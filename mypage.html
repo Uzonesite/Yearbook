@@ -242,7 +242,9 @@
       cursor:grab;
     }
 
-    .item.dragging{
+    .item.dragging,
+    .item.rotating,
+    .item.resizing{
       cursor:grabbing;
     }
 
@@ -256,13 +258,6 @@
       user-select:none;
     }
 
-    .signature{
-      position:absolute;
-      opacity:.92;
-      pointer-events:none;
-      filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));
-    }
-
     .handle{
       position:absolute;
       width:18px;
@@ -271,7 +266,7 @@
       border:2px solid #fff;
       background:linear-gradient(135deg,var(--accent),var(--accent2));
       box-shadow:0 4px 12px rgba(0,0,0,.25);
-      z-index:2;
+      z-index:4;
     }
 
     .rotate-handle{
@@ -464,6 +459,7 @@
           <span>Drag to move.</span>
           <span>Top-right handle rotates.</span>
           <span>Bottom-right handle resizes.</span>
+          <span>Shift while rotating snaps to 15°.</span>
         </div>
       </div>
 
@@ -567,31 +563,11 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /*
-      These sizes are intentionally matched to the new yearbook.html
-      so rendered item positions line up exactly between editor and book.
-    */
     const TYPE_LAYOUT = {
-      0: {
-        label: "Type 0 • 1/8 page",
-        canvasWidth: 1000,
-        canvasHeight: 1000
-      },
-      1: {
-        label: "Type 1 • 1/4 page",
-        canvasWidth: 1000,
-        canvasHeight: 500
-      },
-      2: {
-        label: "Type 2 • 1/2 page",
-        canvasWidth: 1000,
-        canvasHeight: 1000
-      },
-      3: {
-        label: "Type 3 • Full page",
-        canvasWidth: 1000,
-        canvasHeight: 2000
-      }
+      0: { label: "Type 0 • 1/8 page", canvasWidth: 1000, canvasHeight: 1000 },
+      1: { label: "Type 1 • 1/4 page", canvasWidth: 1000, canvasHeight: 500 },
+      2: { label: "Type 2 • 1/2 page", canvasWidth: 1000, canvasHeight: 1000 },
+      3: { label: "Type 3 • Full page", canvasWidth: 1000, canvasHeight: 2000 }
     };
 
     const spotStage = document.getElementById("spotStage");
@@ -655,10 +631,7 @@
 
     function getCanvasSize(type) {
       const meta = getTypeMeta(type);
-      return {
-        width: meta.canvasWidth,
-        height: meta.canvasHeight
-      };
+      return { width: meta.canvasWidth, height: meta.canvasHeight };
     }
 
     function getElements() {
@@ -678,14 +651,8 @@
       return Math.max(min, Math.min(max, value));
     }
 
-    function openModal(el) {
-      el.style.display = "flex";
-    }
-
-    function closeModal(el) {
-      el.style.display = "none";
-    }
-
+    function openModal(el) { el.style.display = "flex"; }
+    function closeModal(el) { el.style.display = "none"; }
     function closeAllModals() {
       closeModal(textModalBg);
       closeModal(imageModalBg);
@@ -694,7 +661,6 @@
     async function ensureDocs(user) {
       const userRef = doc(db, "yearbook", `user_${user.uid}`);
       const spotRef = doc(db, "yearbook", `spot_${user.uid}`);
-
       const [userSnap, spotSnap] = await Promise.all([getDoc(userRef), getDoc(spotRef)]);
 
       if (!userSnap.exists()) {
@@ -730,7 +696,6 @@
 
       const userRef = doc(db, "yearbook", `user_${user.uid}`);
       const spotRef = doc(db, "yearbook", `spot_${user.uid}`);
-
       const [userSnap, spotSnap] = await Promise.all([getDoc(userRef), getDoc(spotRef)]);
       userDoc = userSnap.data();
       spotDoc = spotSnap.data();
@@ -755,6 +720,17 @@
       setStatus(spotDoc.published ? "Published" : "Draft loaded", spotDoc.published ? "good" : "");
     }
 
+    function itemStyle(item) {
+      return [
+        `left:${item.x || 0}px`,
+        `top:${item.y || 0}px`,
+        `width:${item.w || 80}px`,
+        `height:${item.h || 80}px`,
+        `transform:rotate(${item.rotation || 0}deg)`,
+        `z-index:${item.z || 1}`
+      ].join(";");
+    }
+
     function renderSpot() {
       if (!spotDoc || !userDoc) return;
 
@@ -765,24 +741,14 @@
 
       const elementsHtml = getElements().map(item => {
         const selected = item.id === selectedId ? " selected" : "";
-        const baseStyle = `
-          left:${item.x || 0}px;
-          top:${item.y || 0}px;
-          width:${item.w || 80}px;
-          height:${item.h || 80}px;
-          transform:rotate(${item.rotation || 0}deg);
-          z-index:${item.z || 1};
-        `;
 
         if (item.kind === "text") {
           return `
-            <div class="item text${selected}" data-id="${item.id}" style="${baseStyle}
-              color:${item.color || "#111111"};
-              font-size:${item.fontSize || 44}px;
-              font-weight:${item.fontWeight || 700};
-              font-family:${item.fontFamily || "Inter, Arial, sans-serif"};
-              text-align:${item.align || "left"};
-            ">
+            <div
+              class="item text${selected}"
+              data-id="${item.id}"
+              style="${itemStyle(item)};color:${item.color || "#111111"};font-size:${item.fontSize || 44}px;font-weight:${item.fontWeight || 700};font-family:${item.fontFamily || "Inter, Arial, sans-serif"};text-align:${item.align || "left"};"
+            >
               ${escapeHtml(item.text || "")}
               ${item.id === selectedId ? `
                 <div class="handle rotate-handle" data-action="rotate"></div>
@@ -794,7 +760,7 @@
 
         if (item.kind === "image") {
           return `
-            <div class="item image${selected}" data-id="${item.id}" style="${baseStyle}">
+            <div class="item image${selected}" data-id="${item.id}" style="${itemStyle(item)}">
               <img src="${item.src}" alt="" draggable="false" />
               ${item.id === selectedId ? `
                 <div class="handle rotate-handle" data-action="rotate"></div>
@@ -807,21 +773,6 @@
         return "";
       }).join("");
 
-      const signaturesHtml = (spotDoc.signatures || []).map(sig => `
-        <img
-          class="signature"
-          src="${sig.dataUrl}"
-          style="
-            left:${sig.x || 0}px;
-            top:${sig.y || 0}px;
-            width:${sig.w || 0}px;
-            height:${sig.h || 0}px;
-            transform:rotate(${sig.rotation || 0}deg);
-          "
-          alt=""
-        />
-      `).join("");
-
       const emptyNote = getElements().length === 0
         ? `<div class="empty-note">Your canvas is empty.<br>Use Add Text or Add Image.</div>`
         : "";
@@ -829,11 +780,24 @@
       spotStage.innerHTML = `
         <div class="canvas-grid"></div>
         ${elementsHtml}
-        ${signaturesHtml}
         ${emptyNote}
       `;
+    }
 
-      bindStageEvents();
+    function updateItemElement(item) {
+      const el = spotStage.querySelector(`.item[data-id="${item.id}"]`);
+      if (!el) return;
+      el.style.left = `${item.x || 0}px`;
+      el.style.top = `${item.y || 0}px`;
+      el.style.width = `${item.w || 80}px`;
+      el.style.height = `${item.h || 80}px`;
+      el.style.transform = `rotate(${item.rotation || 0}deg)`;
+      el.style.zIndex = `${item.z || 1}`;
+
+      if (item.kind === "text") {
+        el.style.color = item.color || "#111111";
+        el.style.fontSize = `${item.fontSize || 44}px`;
+      }
     }
 
     function selectItem(id) {
@@ -883,6 +847,7 @@
         itemStartRotation: item.rotation || 0,
         targetEl: itemEl
       };
+      itemEl.classList.add("rotating");
     }
 
     function startResize(item, point, pointerId, itemEl) {
@@ -894,81 +859,73 @@
         startY: point.y,
         itemStartW: item.w || 80,
         itemStartH: item.h || 80,
-        itemStartX: item.x || 0,
-        itemStartY: item.y || 0,
         aspect: (item.w || 80) / Math.max(1, (item.h || 80)),
         isText: item.kind === "text",
         startFontSize: item.fontSize || 44,
         targetEl: itemEl
       };
+      itemEl.classList.add("resizing");
     }
 
-    function bindStageEvents() {
-      const itemEls = spotStage.querySelectorAll(".item");
+    spotStage.addEventListener("pointerdown", (e) => {
+      const itemEl = e.target.closest(".item");
 
-      itemEls.forEach(itemEl => {
-        itemEl.addEventListener("pointerdown", (e) => {
-          const id = itemEl.dataset.id;
-          const item = getElements().find(el => el.id === id);
-          if (!item) return;
-
-          selectItem(id);
-
-          const point = getStagePoint(e.clientX, e.clientY);
-          const actionEl = e.target.closest("[data-action]");
-          const action = actionEl?.dataset.action || "move";
-
-          e.preventDefault();
-          e.stopPropagation();
-
-          itemEl.setPointerCapture(e.pointerId);
-
-          if (action === "rotate") {
-            startRotate(item, point, e.pointerId, itemEl);
-          } else if (action === "resize") {
-            startResize(item, point, e.pointerId, itemEl);
-          } else {
-            startMove(item, point, e.pointerId, itemEl);
-          }
-        });
-      });
-
-      spotStage.addEventListener("pointerdown", (e) => {
+      if (!itemEl) {
         if (e.target === spotStage || e.target.classList.contains("canvas-grid") || e.target.classList.contains("empty-note")) {
           clearSelection();
         }
-      });
-    }
+        return;
+      }
+
+      const id = itemEl.dataset.id;
+      const item = getElements().find(el => el.id === id);
+      if (!item) return;
+
+      const point = getStagePoint(e.clientX, e.clientY);
+      const actionEl = e.target.closest("[data-action]");
+      const action = actionEl?.dataset.action || "move";
+
+      if (selectedId !== id) {
+        selectItem(id);
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      itemEl.setPointerCapture(e.pointerId);
+
+      if (action === "rotate") {
+        startRotate(item, point, e.pointerId, itemEl);
+      } else if (action === "resize") {
+        startResize(item, point, e.pointerId, itemEl);
+      } else {
+        startMove(item, point, e.pointerId, itemEl);
+      }
+    });
 
     window.addEventListener("pointermove", (e) => {
-      if (!dragState || e.pointerId !== dragState.pointerId) return;
+      if (!dragState || e.pointerId !== dragState.pointerId || !userDoc) return;
 
       const item = getElements().find(el => el.id === dragState.itemId);
       if (!item) return;
 
       const point = getStagePoint(e.clientX, e.clientY);
-      const canvasSize = getCanvasSize(userDoc?.type || 0);
+      const canvasSize = getCanvasSize(userDoc.type || 0);
 
       if (dragState.mode === "move") {
         const dx = point.x - dragState.startX;
         const dy = point.y - dragState.startY;
-
         item.x = clamp(Math.round(dragState.itemStartX + dx), 0, canvasSize.width - (item.w || 0));
         item.y = clamp(Math.round(dragState.itemStartY + dy), 0, canvasSize.height - (item.h || 0));
-        renderSpot();
+        updateItemElement(item);
         return;
       }
 
       if (dragState.mode === "rotate") {
         const angle = Math.atan2(point.y - dragState.centerY, point.x - dragState.centerX) * 180 / Math.PI;
         let rotation = dragState.itemStartRotation + (angle - dragState.startPointerAngle);
-
-        if (e.shiftKey) {
-          rotation = Math.round(rotation / 15) * 15;
-        }
-
+        if (e.shiftKey) rotation = Math.round(rotation / 15) * 15;
         item.rotation = Math.round(rotation);
-        renderSpot();
+        updateItemElement(item);
         return;
       }
 
@@ -987,18 +944,18 @@
           newH = Math.max(50, Math.round(newW / Math.max(0.1, dragState.aspect)));
         }
 
-        newW = Math.min(newW, canvasSize.width - (item.x || 0));
-        newH = Math.min(newH, canvasSize.height - (item.y || 0));
-
-        item.w = newW;
-        item.h = newH;
-        renderSpot();
+        item.w = Math.min(newW, canvasSize.width - (item.x || 0));
+        item.h = Math.min(newH, canvasSize.height - (item.y || 0));
+        updateItemElement(item);
       }
     });
 
     function endDrag(e) {
       if (!dragState || e.pointerId !== dragState.pointerId) return;
-      dragState?.targetEl?.classList?.remove("dragging");
+      dragState.targetEl?.classList.remove("dragging", "rotating", "resizing");
+      try {
+        dragState.targetEl?.releasePointerCapture?.(e.pointerId);
+      } catch {}
       dragState = null;
     }
 
@@ -1012,7 +969,6 @@
         return;
       }
 
-      const elements = [...getElements()];
       const item = {
         id: uid(),
         kind: "text",
@@ -1030,7 +986,7 @@
         z: ++zCounter
       };
 
-      elements.push(item);
+      const elements = [...getElements(), item];
       setElements(elements);
       selectedId = item.id;
       closeModal(textModalBg);
@@ -1061,7 +1017,7 @@
       canvas.height = h;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, w, h);
-      return canvas.toDataURL("image/jpeg", quality);
+      return { src: canvas.toDataURL("image/jpeg", quality), w, h };
     }
 
     async function addImageFromFile(file) {
@@ -1072,23 +1028,24 @@
 
       setStatus("Compressing image...");
       try {
-        const src = await compressImageToDataUrl(file);
-        const elements = [...getElements()];
-
+        const result = await compressImageToDataUrl(file);
         const maxWidth = 420;
+        const displayW = Math.min(maxWidth, result.w);
+        const displayH = Math.max(50, Math.round(result.h * (displayW / result.w)));
+
         const item = {
           id: uid(),
           kind: "image",
-          src,
+          src: result.src,
           x: 80,
           y: 80,
-          w: maxWidth,
-          h: 300,
+          w: displayW,
+          h: displayH,
           rotation: 0,
           z: ++zCounter
         };
 
-        elements.push(item);
+        const elements = [...getElements(), item];
         setElements(elements);
         selectedId = item.id;
 
@@ -1108,7 +1065,6 @@
       setStatus("Saving...");
       try {
         const spotRef = doc(db, "yearbook", `spot_${currentUser.uid}`);
-
         const payload = {
           kind: "spot",
           uid: currentUser.uid,
@@ -1116,7 +1072,7 @@
           type: userDoc.type || 0,
           background: spotDoc.background || "#ffffff",
           elements: getElements(),
-          signatures: spotDoc.signatures || [],
+          signatures: [],
           updatedAt: serverTimestamp(),
           ...extra
         };
