@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uZone Yearbook — My Spot</title>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <style>
+    :root{
+      --bg:#0b0b10;
+      --panel:#13131c;
+      --panel2:#171722;
+      --line:#2c2d39;
+      --text:#f5f7fb;
+      --muted:#a7adbb;
+      --accent:#7c5cff;
+      --accent2:#bb86fc;
+      --good:#37c86e;
+      --bad:#ff6678;
+      --warn:#ffc857;
+      --shadow:0 20px 60px rgba(0,0,0,.35);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,Arial,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124,92,255,.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(187,134,252,.12), transparent 28%),
+        linear-gradient(180deg,#09090e,#11111a);
+      color:var(--text);
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:30;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 20px;
+      background:rgba(10,10,16,.72);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 0 22px rgba(124,92,255,.55);
+    }
+
+    .top-actions,.toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    button,a.btn,input,select,textarea{
+      font:inherit;
+    }
+
+    button,a.btn{
+      border:none;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 15px;
+      border-radius:14px;
+      font-weight:800;
+      transition:.16s ease;
+    }
+
+    button:hover,a.btn:hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+    .ghost{background:#10111a;color:#fff;border:1px solid var(--line)}
+    .danger{background:#2a1218;color:#ff9eaa;border:1px solid #4a1c27}
+
+    .wrap{
+      width:min(1480px,100%);
+      margin:0 auto;
+      padding:20px;
+      display:grid;
+      grid-template-columns:340px 1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .panel{
+      background:rgba(18,18,26,.88);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .sidebar{
+      padding:16px;
+      position:sticky;
+      top:88px;
+    }
+
+    .section{
+      background:#151621;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .section h3{
+      margin:0 0 10px;
+      font-size:1rem;
+      letter-spacing:-.02em;
+    }
+
+    .meta{
+      color:var(--muted);
+      line-height:1.55;
+      font-size:.95rem;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(124,92,255,.12);
+      border:1px solid rgba(124,92,255,.24);
+      color:#dbcfff;
+      font-size:.88rem;
+      font-weight:800;
+      margin-top:8px;
+    }
+
+    .field{margin-bottom:10px}
+    label{
+      display:block;
+      font-size:.9rem;
+      font-weight:700;
+      margin-bottom:7px;
+    }
+
+    input[type="text"], input[type="color"], input[type="number"], textarea, select{
+      width:100%;
+      background:#0e0f16;
+      color:#fff;
+      border:1px solid var(--line);
+      border-radius:13px;
+      outline:none;
+      padding:11px 12px;
+    }
+
+    textarea{min-height:90px;resize:vertical}
+    input[type="file"]{
+      width:100%;
+      color:var(--muted);
+    }
+
+    .stack{display:grid;gap:10px}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    .editor-panel{
+      padding:18px;
+    }
+
+    .toolbar{
+      margin-bottom:14px;
+      justify-content:space-between;
+    }
+
+    .toolbar-left,.toolbar-right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .status{
+      min-height:24px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .status.good{color:var(--good)}
+    .status.bad{color:var(--bad)}
+
+    .stage-wrap{
+      display:grid;
+      place-items:center;
+      padding:20px;
+      border-radius:22px;
+      background:
+        linear-gradient(180deg,#10111a,#0d0e15);
+      border:1px solid rgba(255,255,255,.06);
+      min-height:70vh;
+      overflow:auto;
+    }
+
+    .spot-stage{
+      background:#fff;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 30px 70px rgba(0,0,0,.28);
+      border-radius:18px;
+      touch-action:none;
+    }
+
+    .item{
+      position:absolute;
+      border:2px solid transparent;
+      user-select:none;
+      transform-origin:center center;
+      touch-action:none;
+    }
+
+    .item.selected{
+      border-color:rgba(124,92,255,.85);
+      box-shadow:0 0 0 3px rgba(124,92,255,.16);
+    }
+
+    .item img{
+      width:100%;height:100%;
+      display:block;
+      object-fit:contain;
+      pointer-events:none;
+    }
+
+    .item.text{
+      white-space:pre-wrap;
+      overflow-wrap:break-word;
+      line-height:1.15;
+      padding:4px;
+    }
+
+    .rotate-handle{
+      position:absolute;
+      width:20px;height:20px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      border:2px solid white;
+      top:-28px;right:-10px;
+      cursor:grab;
+      box-shadow:0 4px 12px rgba(0,0,0,.25);
+    }
+
+    .signature{
+      position:absolute;
+      opacity:.92;
+      pointer-events:none;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));
+    }
+
+    .mini{
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.55;
+    }
+
+    .list{
+      display:grid;
+      gap:8px;
+      max-height:180px;
+      overflow:auto;
+    }
+
+    .sig-row{
+      padding:10px;
+      border-radius:12px;
+      background:#10111a;
+      border:1px solid rgba(255,255,255,.06);
+      font-size:.92rem;
+      color:var(--muted);
+    }
+
+    @media (max-width: 1080px){
+      .wrap{grid-template-columns:1fr}
+      .sidebar{position:static}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> uZone Yearbook Editor</div>
+    <div class="top-actions">
+      <a class="btn ghost" href="book.html">View Book</a>
+      <a class="btn ghost" href="auth.html">Auth</a>
+      <button class="btn danger" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <aside class="panel sidebar">
+      <div class="section">
+        <h3>Your account</h3>
+        <div class="meta" id="userMeta">Loading user...</div>
+        <div class="pill" id="typeBadge">Type 0 • 1/8 page</div>
+      </div>
+
+      <div class="section">
+        <h3>Add text</h3>
+        <div class="field">
+          <label for="textInput">Text</label>
+          <textarea id="textInput" placeholder="Write something for your yearbook spot..."></textarea>
+        </div>
+        <div class="two">
+          <div class="field">
+            <label for="textColor">Text color</label>
+            <input id="textColor" type="color" value="#111111" />
+          </div>
+          <div class="field">
+            <label for="fontSize">Font size</label>
+            <input id="fontSize" type="number" min="12" max="140" value="44" />
+          </div>
+        </div>
+        <button class="primary" id="addTextBtn">Add Text</button>
+      </div>
+
+      <div class="section">
+        <h3>Add image</h3>
+        <div class="field">
+          <label for="imageInput">Upload image</label>
+          <input id="imageInput" type="file" accept="image/*" />
+        </div>
+        <div class="mini">
+          Images are compressed into the spot document. Keep them reasonable so the Firestore document does not get too large.
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Spot appearance</h3>
+        <div class="field">
+          <label for="bgColor">Background color</label>
+          <input id="bgColor" type="color" value="#ffffff" />
+        </div>
+        <button class="ghost" id="clearAllBtn">Clear Canvas</button>
+      </div>
+
+      <div class="section">
+        <h3>Selected item</h3>
+        <div class="field">
+          <label for="selectedRotation">Rotation</label>
+          <input id="selectedRotation" type="number" step="1" value="0" />
+        </div>
+        <div class="field">
+          <label for="selectedFontSize">Text size</label>
+          <input id="selectedFontSize" type="number" min="12" max="180" value="44" />
+        </div>
+        <div class="two">
+          <button class="ghost" id="bringFrontBtn">Bring Front</button>
+          <button class="danger" id="deleteItemBtn">Delete</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Signatures on your spot</h3>
+        <div class="mini" style="margin-bottom:8px;">
+          Friends can add signatures from the published book page. They show up here automatically.
+        </div>
+        <div class="list" id="signatureList"></div>
+      </div>
+    </aside>
+
+    <main class="panel editor-panel">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="ghost" id="saveBtn">Save Draft</button>
+          <button class="primary" id="publishBtn">Publish</button>
+          <button class="ghost" id="unpublishBtn">Unpublish</button>
+        </div>
+        <div class="toolbar-right">
+          <div class="status" id="status">Loading your spot...</div>
+        </div>
+      </div>
+
+      <div class="stage-wrap">
+        <div id="spotStage" class="spot-stage"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      updateDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const TYPE_LAYOUT = {
+      0: { label: "Type 0 • 1/8 page", cols: 1, rows: 1 },
+      1: { label: "Type 1 • 1/4 page", cols: 2, rows: 1 },
+      2: { label: "Type 2 • 1/2 page", cols: 2, rows: 2 },
+      3: { label: "Type 3 • Full page", cols: 2, rows: 4 }
+    };
+
+    const userMeta = document.getElementById("userMeta");
+    const typeBadge = document.getElementById("typeBadge");
+    const spotStage = document.getElementById("spotStage");
+    const statusEl = document.getElementById("status");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const textInput = document.getElementById("textInput");
+    const textColor = document.getElementById("textColor");
+    const fontSize = document.getElementById("fontSize");
+    const addTextBtn = document.getElementById("addTextBtn");
+
+    const imageInput = document.getElementById("imageInput");
+    const bgColor = document.getElementById("bgColor");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+
+    const selectedRotation = document.getElementById("selectedRotation");
+    const selectedFontSize = document.getElementById("selectedFontSize");
+    const bringFrontBtn = document.getElementById("bringFrontBtn");
+    const deleteItemBtn = document.getElementById("deleteItemBtn");
+
+    const saveBtn = document.getElementById("saveBtn");
+    const publishBtn = document.getElementById("publishBtn");
+    const unpublishBtn = document.getElementById("unpublishBtn");
+    const signatureList = document.getElementById("signatureList");
+
+    let currentUser = null;
+    let userDoc = null;
+    let spotDoc = null;
+    let selectedId = null;
+    let zCounter = 5;
+
+    function setStatus(msg = "", type = "") {
+      statusEl.textContent = msg;
+      statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    function fitSize(type) {
+      const meta = TYPE_LAYOUT[type] || TYPE_LAYOUT[0];
+      const width = 1000;
+      const height = 1000 * (meta.rows / meta.cols);
+      return { width, height };
+    }
+
+    function uid() {
+      return Math.random().toString(36).slice(2,10);
+    }
+
+    function escapeHtml(str = "") {
+      return str.replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    async function ensureDocs(user) {
+      const userRef = doc(db, "yearbook", `user_${user.uid}`);
+      const spotRef = doc(db, "yearbook", `spot_${user.uid}`);
+
+      const [userSnap, spotSnap] = await Promise.all([getDoc(userRef), getDoc(spotRef)]);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          kind: "user",
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || "Student",
+          type: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+
+      if (!spotSnap.exists()) {
+        await setDoc(spotRef, {
+          kind: "spot",
+          uid: user.uid,
+          ownerName: user.displayName || "Student",
+          type: 0,
+          published: false,
+          background: "#ffffff",
+          elements: [],
+          signatures: [],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
+
+    async function loadUserAndSpot(user) {
+      await ensureDocs(user);
+
+      const userRef = doc(db, "yearbook", `user_${user.uid}`);
+      const spotRef = doc(db, "yearbook", `spot_${user.uid}`);
+
+      const [userSnap, spotSnap] = await Promise.all([getDoc(userRef), getDoc(spotRef)]);
+      userDoc = userSnap.data();
+      spotDoc = spotSnap.data();
+
+      if (typeof spotDoc.type !== "number" || spotDoc.type !== userDoc.type) {
+        spotDoc.type = userDoc.type || 0;
+        await updateDoc(spotRef, {
+          type: spotDoc.type,
+          ownerName: user.displayName || userDoc.displayName || "Student",
+          updatedAt: serverTimestamp()
+        });
+      }
+
+      userMeta.innerHTML = `
+        <strong>${escapeHtml(user.displayName || userDoc.displayName || "Student")}</strong><br>
+        <span style="color:var(--muted)">${escapeHtml(user.email || "")}</span>
+      `;
+      typeBadge.textContent = (TYPE_LAYOUT[userDoc.type] || TYPE_LAYOUT[0]).label;
+      bgColor.value = spotDoc.background || "#ffffff";
+
+      renderSpot();
+      renderSignaturesList();
+      setStatus(spotDoc.published ? "Published" : "Draft loaded", spotDoc.published ? "good" : "");
+    }
+
+    function renderSignaturesList() {
+      const sigs = Array.isArray(spotDoc.signatures) ? spotDoc.signatures : [];
+      if (!sigs.length) {
+        signatureList.innerHTML = `<div class="sig-row">No signatures yet.</div>`;
+        return;
+      }
+      signatureList.innerHTML = sigs
+        .slice()
+        .reverse()
+        .map(sig => `<div class="sig-row"><strong>${escapeHtml(sig.signerName || "Anonymous")}</strong></div>`)
+        .join("");
+    }
+
+    function getElements() {
+      return Array.isArray(spotDoc.elements) ? spotDoc.elements : [];
+    }
+
+    function setElements(elements) {
+      spotDoc.elements = elements;
+    }
+
+    function getSelectedItem() {
+      return getElements().find(el => el.id === selectedId) || null;
+    }
+
+    function renderSpot() {
+      const type = userDoc?.type ?? 0;
+      const size = fitSize(type);
+      spotStage.style.width = `${size.width}px`;
+      spotStage.style.height = `${size.height}px`;
+      spotStage.style.background = spotDoc.background || "#ffffff";
+
+      const itemsHtml = getElements().map(item => {
+        const isSelected = item.id === selectedId;
+        if (item.kind === "text") {
+          return `
+            <div class="item text ${isSelected ? "selected" : ""}"
+                 data-id="${item.id}"
+                 style="
+                  left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;
+                  transform:rotate(${item.rotation || 0}deg);
+                  z-index:${item.z || 1};
+                  color:${item.color || "#111111"};
+                  font-size:${item.fontSize || 44}px;
+                  font-weight:${item.fontWeight || 700};
+                  text-align:${item.align || "left"};
+                 ">
+              ${escapeHtml(item.text || "")}
+              <div class="rotate-handle"></div>
+            </div>
+          `;
+        }
+        return `
+          <div class="item ${isSelected ? "selected" : ""}"
+               data-id="${item.id}"
+               style="
+                 left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;
+                 transform:rotate(${item.rotation || 0}deg);
+                 z-index:${item.z || 1};
+               ">
+            <img src="${item.src}" alt="" draggable="false" />
+            <div class="rotate-handle"></div>
+          </div>
+        `;
+      }).join("");
+
+      const sigsHtml = (spotDoc.signatures || []).map(sig => `
+        <img class="signature" src="${sig.dataUrl}"
+             style="left:${sig.x}px;top:${sig.y}px;width:${sig.w}px;height:${sig.h}px;transform:rotate(${sig.rotation || 0}deg);" />
+      `).join("");
+
+      spotStage.innerHTML = itemsHtml + sigsHtml;
+
+      attachItemBehavior();
+      updateSelectionFields();
+    }
+
+    function updateSelectionFields() {
+      const item = getSelectedItem();
+      if (!item) {
+        selectedRotation.value = 0;
+        selectedFontSize.value = 44;
+        return;
+      }
+      selectedRotation.value = item.rotation || 0;
+      selectedFontSize.value = item.fontSize || 44;
+    }
+
+    function selectItem(id) {
+      selectedId = id;
+      renderSpot();
+    }
+
+    spotStage.addEventListener("click", (e) => {
+      const itemEl = e.target.closest(".item");
+      if (!itemEl) {
+        selectedId = null;
+        renderSpot();
+        return;
+      }
+      selectItem(itemEl.dataset.id);
+    });
+
+    function attachItemBehavior() {
+      interact('.item').unset();
+      interact('.rotate-handle').unset();
+
+      interact('.item').draggable({
+        listeners: {
+          move(event) {
+            const id = event.target.dataset.id;
+            const item = getElements().find(el => el.id === id);
+            if (!item) return;
+            item.x += event.dx;
+            item.y += event.dy;
+            renderSpot();
+          }
+        }
+      }).resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        listeners: {
+          move(event) {
+            const id = event.target.dataset.id;
+            const item = getElements().find(el => el.id === id);
+            if (!item) return;
+
+            item.x += event.deltaRect.left;
+            item.y += event.deltaRect.top;
+            item.w = Math.max(40, event.rect.width);
+            item.h = Math.max(40, event.rect.height);
+
+            renderSpot();
+          }
+        }
+      });
+
+      interact('.rotate-handle').draggable({
+        listeners: {
+          move(event) {
+            const itemEl = event.target.parentElement;
+            const id = itemEl.dataset.id;
+            const item = getElements().find(el => el.id === id);
+            if (!item) return;
+
+            const rect = itemEl.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const angle = Math.atan2(event.client.y - cy, event.client.x - cx) * 180 / Math.PI;
+            item.rotation = Math.round(angle + 90);
+            renderSpot();
+          }
+        }
+      });
+    }
+
+    function addTextItem() {
+      const text = textInput.value.trim();
+      if (!text) {
+        setStatus("Write some text first.", "bad");
+        return;
+      }
+
+      const elements = getElements();
+      const item = {
+        id: uid(),
+        kind: "text",
+        text,
+        x: 50,
+        y: 50,
+        w: 420,
+        h: 180,
+        rotation: 0,
+        color: textColor.value,
+        fontSize: Number(fontSize.value) || 44,
+        fontWeight: 700,
+        z: ++zCounter
+      };
+      elements.push(item);
+      setElements(elements);
+      selectedId = item.id;
+      renderSpot();
+      setStatus("Text added.");
+    }
+
+    async function compressImageToDataUrl(file, maxDim = 1600, quality = 0.88) {
+      const img = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const i = new Image();
+          i.onload = () => resolve(i);
+          i.onerror = reject;
+          i.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      return canvas.toDataURL("image/jpeg", quality);
+    }
+
+    async function addImageFromFile(file) {
+      if (!file) return;
+      setStatus("Compressing image...");
+      try {
+        const src = await compressImageToDataUrl(file);
+        const elements = getElements();
+
+        const item = {
+          id: uid(),
+          kind: "image",
+          src,
+          x: 80,
+          y: 80,
+          w: 360,
+          h: 260,
+          rotation: 0,
+          z: ++zCounter
+        };
+
+        elements.push(item);
+        setElements(elements);
+        selectedId = item.id;
+        renderSpot();
+        setStatus("Image added.");
+      } catch (err) {
+        console.error(err);
+        setStatus("Could not load that image.", "bad");
+      } finally {
+        imageInput.value = "";
+      }
+    }
+
+    async function saveSpot(extra = {}) {
+      if (!currentUser) return;
+      setStatus("Saving...");
+      try {
+        const spotRef = doc(db, "yearbook", `spot_${currentUser.uid}`);
+        const payload = {
+          kind: "spot",
+          uid: currentUser.uid,
+          ownerName: currentUser.displayName || userDoc.displayName || "Student",
+          type: userDoc.type || 0,
+          background: spotDoc.background || "#ffffff",
+          elements: getElements(),
+          signatures: spotDoc.signatures || [],
+          updatedAt: serverTimestamp(),
+          ...extra
+        };
+        await setDoc(spotRef, payload, { merge: true });
+        if (typeof extra.published === "boolean") spotDoc.published = extra.published;
+        setStatus(spotDoc.published ? "Published" : "Draft saved", "good");
+      } catch (err) {
+        console.error(err);
+        setStatus(err.message || "Save failed.", "bad");
+      }
+    }
+
+    addTextBtn.onclick = addTextItem;
+    imageInput.onchange = (e) => addImageFromFile(e.target.files[0]);
+
+    bgColor.oninput = () => {
+      if (!spotDoc) return;
+      spotDoc.background = bgColor.value;
+      renderSpot();
+    };
+
+    clearAllBtn.onclick = () => {
+      if (!confirm("Clear all text and images from your spot?")) return;
+      spotDoc.elements = [];
+      selectedId = null;
+      renderSpot();
+      setStatus("Canvas cleared.");
+    };
+
+    selectedRotation.oninput = () => {
+      const item = getSelectedItem();
+      if (!item) return;
+      item.rotation = Number(selectedRotation.value) || 0;
+      renderSpot();
+    };
+
+    selectedFontSize.oninput = () => {
+      const item = getSelectedItem();
+      if (!item || item.kind !== "text") return;
+      item.fontSize = Math.max(12, Number(selectedFontSize.value) || 44);
+      renderSpot();
+    };
+
+    bringFrontBtn.onclick = () => {
+      const item = getSelectedItem();
+      if (!item) return;
+      item.z = ++zCounter;
+      renderSpot();
+    };
+
+    deleteItemBtn.onclick = () => {
+      if (!selectedId) return;
+      spotDoc.elements = getElements().filter(el => el.id !== selectedId);
+      selectedId = null;
+      renderSpot();
+      setStatus("Item deleted.");
+    };
+
+    saveBtn.onclick = () => saveSpot({ published: false });
+    publishBtn.onclick = () => saveSpot({ published: true });
+    unpublishBtn.onclick = () => saveSpot({ published: false });
+
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      location.href = "auth.html";
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        location.href = "auth.html";
+        return;
+      }
+      currentUser = user;
+      try {
+        await loadUserAndSpot(user);
+      } catch (err) {
+        console.error(err);
+        setStatus("Could not load your yearbook spot.", "bad");
+      }
+    });
+  </script>
+</body>
+</html>
