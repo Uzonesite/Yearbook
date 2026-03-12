@@ -9,29 +9,32 @@
       --bg:#0b0b10;
       --panel:#12121a;
       --panel2:#171721;
-      --line:#2c2d3a;
+      --line:#262836;
       --text:#f4f7fb;
-      --muted:#a5adbc;
+      --muted:#a7afbf;
       --accent:#7c5cff;
       --accent2:#bb86fc;
-      --danger:#ff6b7a;
-      --good:#38c973;
       --page:#f7f3ea;
       --shadow:0 20px 60px rgba(0,0,0,.32);
       --radius:22px;
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
 
-    body{
+    html,body{
       margin:0;
+      min-height:100%;
       font-family:Inter,system-ui,Arial,sans-serif;
       background:
         radial-gradient(circle at top left, rgba(124,92,255,.12), transparent 28%),
         radial-gradient(circle at bottom right, rgba(187,134,252,.13), transparent 28%),
         linear-gradient(180deg,#09090e,#11111a);
       color:var(--text);
-      min-height:100vh;
+    }
+
+    body{
+      display:flex;
+      flex-direction:column;
     }
 
     .topbar{
@@ -43,7 +46,7 @@
       align-items:center;
       gap:12px;
       padding:16px 20px;
-      background:rgba(10,10,16,.7);
+      background:rgba(10,10,16,.75);
       backdrop-filter:blur(12px);
       border-bottom:1px solid rgba(255,255,255,.07);
     }
@@ -62,6 +65,7 @@
       border-radius:50%;
       background:linear-gradient(135deg,var(--accent),var(--accent2));
       box-shadow:0 0 22px rgba(124,92,255,.55);
+      flex:0 0 auto;
     }
 
     .actions{
@@ -85,7 +89,7 @@
       transition:.18s ease;
     }
 
-    button:hover,a.btn:hover{transform:translateY(-1px)}
+    button:hover,a.btn:hover{ transform:translateY(-1px); }
 
     .primary{
       background:linear-gradient(135deg,var(--accent),var(--accent2));
@@ -99,7 +103,7 @@
     }
 
     .wrap{
-      width:min(1440px,100%);
+      width:min(1500px,100%);
       margin:0 auto;
       padding:24px 20px 60px;
     }
@@ -115,14 +119,14 @@
 
     .hero h1{
       margin:0;
-      font-size:clamp(2rem,5vw,3.2rem);
+      font-size:clamp(2rem,5vw,3.15rem);
       letter-spacing:-.04em;
     }
 
     .hero p{
       margin:8px 0 0;
       color:var(--muted);
-      max-width:56ch;
+      max-width:64ch;
       line-height:1.6;
     }
 
@@ -150,15 +154,21 @@
 
     .book-stage{
       display:grid;
-      grid-template-columns:1fr;
       place-items:center;
     }
 
+    .page-wrap{
+      width:100%;
+      overflow-x:auto;
+      padding-bottom:8px;
+    }
+
     .page{
-      width:min(1180px,100%);
-      aspect-ratio:1.5/1;
+      width:min(1280px,100%);
+      min-width:980px;
+      aspect-ratio:2/1;
       background:linear-gradient(180deg,#fdfaf3,#f5efe4);
-      border-radius:24px;
+      border-radius:26px;
       padding:18px;
       box-shadow:
         inset 0 0 0 1px rgba(0,0,0,.05),
@@ -170,48 +180,65 @@
     .page::before{
       content:"";
       position:absolute;
-      left:0;
-      top:0;
-      bottom:0;
-      width:20px;
-      background:linear-gradient(90deg, rgba(0,0,0,.08), transparent);
-      opacity:.18;
+      inset:0;
       pointer-events:none;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.05), transparent 24px),
+        linear-gradient(180deg, rgba(255,255,255,.35), transparent 28%);
+      opacity:.35;
     }
 
     .page-grid{
+      position:relative;
+      z-index:1;
       width:100%;
       height:100%;
       display:grid;
-      grid-template-columns:repeat(4,1fr);
-      grid-template-rows:repeat(2,1fr);
-      gap:14px;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      grid-template-rows:repeat(2, minmax(0,1fr));
+      gap:0;
+      background:#ddd3c5;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.09);
     }
+
+    .empty-cell{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.68), rgba(247,242,234,.92));
+      border-right:1px solid rgba(0,0,0,.08);
+      border-bottom:1px solid rgba(0,0,0,.08);
+      min-width:0;
+      min-height:0;
+    }
+
+    .empty-cell.edge-right{ border-right:none; }
+    .empty-cell.edge-bottom{ border-bottom:none; }
 
     .spot{
       position:relative;
       overflow:hidden;
       background:#fff;
-      border-radius:18px;
-      border:1px solid rgba(0,0,0,.08);
-      box-shadow:0 8px 20px rgba(0,0,0,.08);
       cursor:pointer;
       min-width:0;
       min-height:0;
+      border-right:1px solid rgba(0,0,0,.08);
+      border-bottom:1px solid rgba(0,0,0,.08);
     }
 
-    .spot.empty{
-      background:rgba(255,255,255,.5);
-      border-style:dashed;
-      border-color:rgba(0,0,0,.12);
-      cursor:default;
+    .spot.edge-right{ border-right:none; }
+    .spot.edge-bottom{ border-bottom:none; }
+
+    .spot:hover{
+      z-index:2;
+      box-shadow:inset 0 0 0 2px rgba(124,92,255,.35);
     }
 
     .spot-head{
       position:absolute;
       left:10px;
       top:10px;
-      z-index:4;
+      z-index:5;
       background:rgba(0,0,0,.52);
       color:#fff;
       padding:7px 10px;
@@ -228,21 +255,11 @@
 
     .spot-canvas{
       position:absolute;
-      inset:0;
-      overflow:hidden;
+      left:0;
+      top:0;
       transform-origin:top left;
       background:#fff;
-    }
-
-    .empty-note{
-      width:100%;
-      height:100%;
-      display:grid;
-      place-items:center;
-      text-align:center;
-      color:#786f67;
-      font-weight:700;
-      padding:20px;
+      overflow:hidden;
     }
 
     .item{
@@ -260,7 +277,7 @@
 
     .signature{
       position:absolute;
-      opacity:.9;
+      opacity:.92;
       pointer-events:none;
       filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));
     }
@@ -282,7 +299,7 @@
     .modal-bg{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.55);
+      background:rgba(0,0,0,.58);
       backdrop-filter:blur(8px);
       display:none;
       align-items:center;
@@ -292,7 +309,7 @@
     }
 
     .modal{
-      width:min(1100px,100%);
+      width:min(1120px,100%);
       max-height:92vh;
       overflow:auto;
       background:#101119;
@@ -312,7 +329,7 @@
 
     .preview{
       width:100%;
-      aspect-ratio:1.5/1;
+      aspect-ratio:2/1;
       max-height:70vh;
       background:#fff;
       border-radius:20px;
@@ -368,21 +385,13 @@
       margin-top:8px;
     }
 
-    @media (max-width: 900px){
-      .page,
-      .preview{
-        aspect-ratio:1/1.2;
-      }
-
-      .page-grid{
-        grid-template-columns:repeat(2,1fr);
-        grid-template-rows:repeat(4,1fr);
-      }
-    }
-
     @media (max-width: 700px){
       .sign-tools{
         grid-template-columns:1fr;
+      }
+
+      .page{
+        min-width:900px;
       }
     }
   </style>
@@ -401,7 +410,7 @@
       <div>
         <h1>Published Yearbook</h1>
         <p>
-          Flip through the published student spots. The layout is 8 spots per page: 4 across and 2 down. Tap any spot to view it larger and sign it.
+          A real collage layout: 4 across, 2 down, with everyone packed seamlessly together on the page.
         </p>
       </div>
     </div>
@@ -435,7 +444,7 @@
 
       <div class="sign-card">
         <h3 style="margin:0 0 8px;">Sign this spot</h3>
-        <div class="hint">Best on mobile. Draw with your finger, then save your signature onto this student’s page.</div>
+        <div class="hint">Draw a signature, then save it onto this student’s page.</div>
 
         <div style="margin:12px 0 10px;">
           <input id="signerNameInput" placeholder="Your name (optional if logged in)" />
@@ -486,17 +495,9 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /*
-      SLOT layout for the book page:
-      - 4 columns x 2 rows = 8 total spots
-      - type 0 = 1x1
-      - type 1 = 2x1
-      - type 2 = 2x2
-      - type 3 = 4x2
+    const PAGE_COLS = 4;
+    const PAGE_ROWS = 2;
 
-      CANVAS sizes below intentionally match the current mypage.html editor logic,
-      so objects render in the same place between editor and book.
-    */
     const TYPE_LAYOUT = {
       0: {
         label: "Type 0 • 1/8 page",
@@ -509,27 +510,24 @@
         label: "Type 1 • 1/4 page",
         slotCols: 2,
         slotRows: 1,
-        canvasWidth: 1000,
-        canvasHeight: 500
+        canvasWidth: 2000,
+        canvasHeight: 1000
       },
       2: {
         label: "Type 2 • 1/2 page",
         slotCols: 2,
         slotRows: 2,
-        canvasWidth: 1000,
-        canvasHeight: 1000
+        canvasWidth: 2000,
+        canvasHeight: 2000
       },
       3: {
         label: "Type 3 • Full page",
         slotCols: 4,
         slotRows: 2,
-        canvasWidth: 1000,
+        canvasWidth: 4000,
         canvasHeight: 2000
       }
     };
-
-    const PAGE_COLS = 4;
-    const PAGE_ROWS = 2;
 
     const bookContainer = document.getElementById("bookContainer");
     const bookMeta = document.getElementById("bookMeta");
@@ -576,42 +574,56 @@
 
     function getCanvasSize(type) {
       const meta = getTypeMeta(type);
-      return {
-        width: meta.canvasWidth,
-        height: meta.canvasHeight
-      };
+      return { width: meta.canvasWidth, height: meta.canvasHeight };
     }
 
     function createEmptyPage() {
-      return Array.from({ length: PAGE_ROWS }, () => Array(PAGE_COLS).fill(null));
+      return Array.from({ length: PAGE_ROWS }, () =>
+        Array.from({ length: PAGE_COLS }, () => null)
+      );
+    }
+
+    function canFit(page, row, col, cols, rows) {
+      if (col + cols > PAGE_COLS || row + rows > PAGE_ROWS) return false;
+      for (let r = row; r < row + rows; r++) {
+        for (let c = col; c < col + cols; c++) {
+          if (page[r][c] !== null) return false;
+        }
+      }
+      return true;
     }
 
     function firstFit(page, cols, rows) {
       for (let r = 0; r <= PAGE_ROWS - rows; r++) {
         for (let c = 0; c <= PAGE_COLS - cols; c++) {
-          let ok = true;
-
-          for (let rr = r; rr < r + rows && ok; rr++) {
-            for (let cc = c; cc < c + cols; cc++) {
-              if (page[rr][cc]) {
-                ok = false;
-                break;
-              }
-            }
+          if (canFit(page, r, c, cols, rows)) {
+            return { row: r, col: c };
           }
-
-          if (ok) return { row: r, col: c };
         }
       }
       return null;
     }
 
-    function markUsed(page, row, col, cols, rows, value) {
+    function placeSpot(page, spot, row, col, cols, rows) {
       for (let r = row; r < row + rows; r++) {
         for (let c = col; c < col + cols; c++) {
-          page[r][c] = value;
+          page[r][c] = {
+            kind: "covered",
+            start: false,
+            spotUid: spot.uid
+          };
         }
       }
+
+      page[row][col] = {
+        kind: "spot",
+        start: true,
+        row,
+        col,
+        cols,
+        rows,
+        spot
+      };
     }
 
     function packSpots(spots) {
@@ -628,19 +640,12 @@
           pos = firstFit(current, meta.slotCols, meta.slotRows);
         }
 
-        const cellData = {
-          spot,
-          start: true,
-          cols: meta.slotCols,
-          rows: meta.slotRows,
-          row: pos.row,
-          col: pos.col
-        };
-
-        markUsed(current, pos.row, pos.col, meta.slotCols, meta.slotRows, cellData);
+        if (!pos) continue;
+        placeSpot(current, spot, pos.row, pos.col, meta.slotCols, meta.slotRows);
       }
 
-      if (current.flat().some(Boolean) || pages.length === 0) {
+      const hasAnything = current.some(row => row.some(cell => cell !== null));
+      if (hasAnything || pages.length === 0) {
         pages.push(current);
       }
 
@@ -728,18 +733,70 @@
       `;
     }
 
-    function applyInnerScale(wrapperEl, innerEl) {
+    function fitInnerToWrapper(wrapperEl, innerEl) {
       if (!wrapperEl || !innerEl) return;
-
       const availableW = wrapperEl.clientWidth;
       const availableH = wrapperEl.clientHeight;
       const innerW = innerEl.offsetWidth;
       const innerH = innerEl.offsetHeight;
-
       if (!availableW || !availableH || !innerW || !innerH) return;
 
       const scale = Math.min(availableW / innerW, availableH / innerH);
       innerEl.style.transform = `scale(${scale})`;
+    }
+
+    function renderEmptyCells(page) {
+      let html = "";
+
+      for (let r = 0; r < PAGE_ROWS; r++) {
+        for (let c = 0; c < PAGE_COLS; c++) {
+          const cell = page[r][c];
+          if (cell !== null) continue;
+
+          const edgeRight = c === PAGE_COLS - 1 ? "edge-right" : "";
+          const edgeBottom = r === PAGE_ROWS - 1 ? "edge-bottom" : "";
+
+          html += `
+            <div
+              class="empty-cell ${edgeRight} ${edgeBottom}"
+              style="grid-column:${c + 1}; grid-row:${r + 1};"
+            ></div>
+          `;
+        }
+      }
+
+      return html;
+    }
+
+    function renderSpots(page) {
+      let html = "";
+
+      for (let r = 0; r < PAGE_ROWS; r++) {
+        for (let c = 0; c < PAGE_COLS; c++) {
+          const cell = page[r][c];
+          if (!cell || !cell.start) continue;
+
+          const spot = cell.spot;
+          const edgeRight = (c + cell.cols) === PAGE_COLS ? "edge-right" : "";
+          const edgeBottom = (r + cell.rows) === PAGE_ROWS ? "edge-bottom" : "";
+
+          html += `
+            <div
+              class="spot ${edgeRight} ${edgeBottom}"
+              data-uid="${spot.uid}"
+              style="
+                grid-column:${c + 1} / span ${cell.cols};
+                grid-row:${r + 1} / span ${cell.rows};
+              "
+            >
+              <div class="spot-head">${escapeHtml(spot.ownerName || "Student")}</div>
+              ${buildSpotInner(spot)}
+            </div>
+          `;
+        }
+      }
+
+      return html;
     }
 
     function renderBook() {
@@ -754,46 +811,24 @@
 
       bookMeta.textContent = `Page ${currentPageIndex + 1} of ${packedPages.length} • ${publishedSpots.length} published spots`;
 
-      const pageHtml = `
-        <div>
-          <div class="page">
-            <div class="page-grid">
-              ${page.map((row, r) => row.map((cell, c) => {
-                if (!cell) {
-                  return `<div class="spot empty"><div class="empty-note">Empty space</div></div>`;
-                }
-
-                if (!cell.start) return "";
-
-                const spot = cell.spot;
-                const meta = getTypeMeta(spot.type);
-
-                return `
-                  <div
-                    class="spot"
-                    data-uid="${spot.uid}"
-                    style="
-                      grid-column:${c + 1} / span ${meta.slotCols};
-                      grid-row:${r + 1} / span ${meta.slotRows};
-                    "
-                  >
-                    <div class="spot-head">${escapeHtml(spot.ownerName || "Student")}</div>
-                    ${buildSpotInner(spot)}
-                  </div>
-                `;
-              }).join("")).join("")}
+      bookContainer.innerHTML = `
+        <div style="width:100%;">
+          <div class="page-wrap">
+            <div class="page">
+              <div class="page-grid">
+                ${renderEmptyCells(page)}
+                ${renderSpots(page)}
+              </div>
             </div>
           </div>
           <div class="page-num">Yearbook Page ${currentPageIndex + 1}</div>
         </div>
       `;
 
-      bookContainer.innerHTML = pageHtml;
-
-      const liveSpots = bookContainer.querySelectorAll(".spot:not(.empty)");
+      const liveSpots = bookContainer.querySelectorAll(".spot");
       liveSpots.forEach((spotEl) => {
         const inner = spotEl.querySelector(".spot-canvas");
-        applyInnerScale(spotEl, inner);
+        fitInnerToWrapper(spotEl, inner);
 
         spotEl.addEventListener("click", () => {
           const uid = spotEl.dataset.uid;
@@ -852,7 +887,7 @@
 
       const fit = spotPreviewFit.querySelector(".spot-canvas");
       requestAnimationFrame(() => {
-        applyInnerScale(spotPreview, fit);
+        fitInnerToWrapper(spotPreview, fit);
       });
 
       signStatus.textContent = "";
@@ -949,12 +984,14 @@
     window.addEventListener("touchend", endDraw);
 
     clearSignatureBtn.onclick = clearPad;
+
     window.addEventListener("resize", () => {
-      resizeSignatureCanvas();
       renderBook();
+      resizeSignatureCanvas();
+
       if (activeSpot && spotModalBg.style.display === "flex") {
         const fit = spotPreviewFit.querySelector(".spot-canvas");
-        if (fit) applyInnerScale(spotPreview, fit);
+        if (fit) fitInnerToWrapper(spotPreview, fit);
       }
     });
 
@@ -979,13 +1016,14 @@
         const signerName = (signerNameInput.value.trim() || currentUser?.displayName || "Anonymous").slice(0, 40);
 
         const size = getCanvasSize(spot.type || 0);
-        const baseW = Math.max(180, size.width * 0.28);
-        const baseH = baseW * 0.45;
-
+        const baseW = Math.max(220, size.width * 0.20);
+        const baseH = baseW * 0.42;
+        const margin = 32;
         const existingCount = sigs.length;
-        const margin = 24;
-        const x = margin + (existingCount % 2) * (baseW + 16);
-        const y = size.height - baseH - margin - Math.floor(existingCount / 2) * (baseH + 14);
+        const perRow = Math.max(1, Math.floor((size.width - margin * 2) / (baseW + 18)));
+
+        const x = margin + (existingCount % perRow) * (baseW + 18);
+        const y = size.height - baseH - margin - Math.floor(existingCount / perRow) * (baseH + 14);
 
         sigs.push({
           signerUid: currentUser?.uid || null,
@@ -995,7 +1033,7 @@
           y: Math.max(margin, Math.min(y, size.height - baseH - margin)),
           w: baseW,
           h: baseH,
-          rotation: (existingCount % 4 - 1.5) * 3,
+          rotation: (existingCount % 5 - 2) * 2.2,
           createdAtMs: Date.now()
         });
 
@@ -1016,7 +1054,6 @@
     }
 
     saveSignatureBtn.onclick = saveSignature;
-
     loadPublished();
   </script>
 </body>
