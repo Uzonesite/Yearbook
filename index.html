@@ -431,12 +431,12 @@
           await updateProfile(cred.user, { displayName });
           await ensureYearbookDocs(cred.user, displayName);
           setStatus("Account created. Redirecting...", "good");
-          location.href = "editor.html";
+          location.href = "mypage.html";
         } else {
           const cred = await signInWithEmailAndPassword(auth, email, password);
           await ensureYearbookDocs(cred.user);
           setStatus("Logged in. Redirecting...", "good");
-          location.href = "editor.html";
+          location.href = "mypage.html";
         }
       } catch (err) {
         setStatus(err.message || "Something went wrong.", "bad");
