@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uZone Yearbook — Login</title>
+  <style>
+    :root{
+      --bg:#0a0a0f;
+      --panel:#12121a;
+      --panel2:#181824;
+      --line:#2a2a38;
+      --text:#f5f7fb;
+      --muted:#a7adbb;
+      --accent:#7c5cff;
+      --accent2:#bb86fc;
+      --good:#35c46a;
+      --bad:#ff5f6d;
+      --shadow:0 20px 60px rgba(0,0,0,.35);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(124,92,255,.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(187,134,252,.16), transparent 30%),
+        linear-gradient(180deg,#09090d,#11111a);
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+
+    .shell{
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:22px;
+    }
+
+    .hero,.card{
+      background:rgba(18,18,26,.86);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      padding:36px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height:580px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto -80px -100px auto;
+      width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(124,92,255,.24), transparent 70%);
+      pointer-events:none;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      font-size:.85rem;
+      color:#d6ccff;
+      background:rgba(124,92,255,.12);
+      border:1px solid rgba(124,92,255,.25);
+      padding:8px 12px;
+      border-radius:999px;
+      width:max-content;
+    }
+
+    h1{
+      font-size:clamp(2.2rem,5vw,4rem);
+      line-height:.95;
+      margin:18px 0 14px;
+      letter-spacing:-.04em;
+    }
+
+    .hero p{
+      max-width:40ch;
+      color:var(--muted);
+      line-height:1.65;
+      margin:0;
+      font-size:1.02rem;
+    }
+
+    .feature-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      margin-top:28px;
+    }
+
+    .feature{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:14px;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .feature strong{
+      display:block;
+      color:var(--text);
+      margin-bottom:4px;
+    }
+
+    .card{
+      padding:28px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      margin-bottom:20px;
+      background:#0d0d14;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:6px;
+    }
+
+    .tab{
+      flex:1;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      padding:12px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s ease;
+    }
+    .tab.active{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:white;
+    }
+
+    .title{
+      font-size:1.55rem;
+      margin:4px 0 6px;
+      letter-spacing:-.03em;
+    }
+
+    .sub{
+      color:var(--muted);
+      margin:0 0 18px;
+      line-height:1.55;
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    label{
+      display:block;
+      font-size:.92rem;
+      font-weight:600;
+      margin:0 0 8px;
+      color:#e6e8ef;
+    }
+
+    input{
+      width:100%;
+      background:#0e0f16;
+      border:1px solid var(--line);
+      color:var(--text);
+      padding:14px 15px;
+      border-radius:14px;
+      outline:none;
+      font-size:1rem;
+    }
+    input:focus{
+      border-color:rgba(124,92,255,.6);
+      box-shadow:0 0 0 4px rgba(124,92,255,.12);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    button{
+      border:none;
+      cursor:pointer;
+      border-radius:14px;
+      padding:14px 16px;
+      font-weight:800;
+      font-size:1rem;
+      transition:transform .15s ease, opacity .2s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+
+    .primary{
+      flex:1;
+      color:white;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+    }
+
+    .ghost{
+      background:#0e0f16;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+
+    .status{
+      margin-top:16px;
+      min-height:24px;
+      font-size:.95rem;
+      font-weight:600;
+    }
+    .status.good{color:var(--good)}
+    .status.bad{color:var(--bad)}
+
+    .small{
+      color:var(--muted);
+      font-size:.9rem;
+      margin-top:12px;
+      line-height:1.5;
+    }
+
+    @media (max-width: 860px){
+      .shell{grid-template-columns:1fr}
+      .hero{min-height:auto}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">uZone • Virtual Student Yearbook</div>
+        <h1>Leave your mark.</h1>
+        <p>
+          Build your own yearbook spot, publish it, and let other students sign it in person on your phone.
+          Everyone starts with a default spot size, and you can upgrade users manually in Firebase.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature"><strong>One spot per user</strong>Each account gets a single editable yearbook spot.</div>
+          <div class="feature"><strong>Flexible layouts</strong>Different account types unlock larger portions of a page.</div>
+          <div class="feature"><strong>Creative editor</strong>Add text, images, drag, resize, and rotate elements.</div>
+          <div class="feature"><strong>Digital signatures</strong>Friends can sign each other’s spots right on mobile.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tabs">
+        <button class="tab active" id="loginTab">Login</button>
+        <button class="tab" id="signupTab">Sign Up</button>
+      </div>
+
+      <h2 class="title" id="formTitle">Welcome back</h2>
+      <p class="sub" id="formSub">Login to edit your yearbook spot or flip through published pages.</p>
+
+      <div class="field">
+        <label for="displayName">Display name</label>
+        <input id="displayName" type="text" placeholder="Your name for the yearbook" />
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="At least 6 characters" />
+      </div>
+
+      <div class="row">
+        <button class="primary" id="submitBtn">Login</button>
+        <button class="ghost" id="goBookBtn" type="button">View Published Book</button>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div class="small">
+        New accounts are automatically created as <strong>Type 0</strong> with a <strong>1/8 page</strong> spot.
+        You can manually change the type later in Firestore.
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      updateProfile
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginTab = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+    const formTitle = document.getElementById("formTitle");
+    const formSub = document.getElementById("formSub");
+    const displayNameField = document.getElementById("displayName").parentElement;
+    const displayNameInput = document.getElementById("displayName");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusEl = document.getElementById("status");
+    const goBookBtn = document.getElementById("goBookBtn");
+
+    let mode = "login";
+
+    function setStatus(msg = "", type = "") {
+      statusEl.textContent = msg;
+      statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const isSignup = mode === "signup";
+      loginTab.classList.toggle("active", !isSignup);
+      signupTab.classList.toggle("active", isSignup);
+      displayNameField.style.display = isSignup ? "block" : "none";
+      formTitle.textContent = isSignup ? "Create your account" : "Welcome back";
+      formSub.textContent = isSignup
+        ? "Start with a default 1/8 page spot and build your yearbook entry."
+        : "Login to edit your yearbook spot or flip through published pages.";
+      submitBtn.textContent = isSignup ? "Create Account" : "Login";
+      setStatus("");
+    }
+
+    loginTab.onclick = () => setMode("login");
+    signupTab.onclick = () => setMode("signup");
+    goBookBtn.onclick = () => location.href = "book.html";
+
+    setMode("login");
+
+    async function ensureYearbookDocs(user, displayNameFallback = "") {
+      const userRef = doc(db, "yearbook", `user_${user.uid}`);
+      const spotRef = doc(db, "yearbook", `spot_${user.uid}`);
+
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          kind: "user",
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || displayNameFallback || "Student",
+          type: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+
+      const spotSnap = await getDoc(spotRef);
+      if (!spotSnap.exists()) {
+        await setDoc(spotRef, {
+          kind: "spot",
+          uid: user.uid,
+          ownerName: user.displayName || displayNameFallback || "Student",
+          type: 0,
+          published: false,
+          background: "#ffffff",
+          elements: [],
+          signatures: [],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
+
+    submitBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      const displayName = displayNameInput.value.trim();
+
+      if (!email || !password) {
+        setStatus("Enter your email and password.", "bad");
+        return;
+      }
+      if (mode === "signup" && !displayName) {
+        setStatus("Enter a display name.", "bad");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      setStatus(mode === "signup" ? "Creating account..." : "Logging in...");
+
+      try {
+        if (mode === "signup") {
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(cred.user, { displayName });
+          await ensureYearbookDocs(cred.user, displayName);
+          setStatus("Account created. Redirecting...", "good");
+          location.href = "editor.html";
+        } else {
+          const cred = await signInWithEmailAndPassword(auth, email, password);
+          await ensureYearbookDocs(cred.user);
+          setStatus("Logged in. Redirecting...", "good");
+          location.href = "editor.html";
+        }
+      } catch (err) {
+        setStatus(err.message || "Something went wrong.", "bad");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          await ensureYearbookDocs(user);
+        } catch {}
+      }
+    });
+  </script>
+</body>
+</html>
