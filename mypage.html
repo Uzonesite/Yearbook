@@ -298,8 +298,8 @@
   <div class="topbar">
     <div class="brand"><span class="dot"></span> uZone Yearbook Editor</div>
     <div class="top-actions">
-      <a class="btn ghost" href="book.html">View Book</a>
-      <a class="btn ghost" href="auth.html">Auth</a>
+      <a class="btn ghost" href="yearbook.html">View Book</a>
+      <a class="btn ghost" href="index.html">Auth</a>
       <button class="btn danger" id="logoutBtn">Logout</button>
     </div>
   </div>
@@ -870,12 +870,12 @@
 
     logoutBtn.onclick = async () => {
       await signOut(auth);
-      location.href = "auth.html";
+      location.href = "index.html";
     };
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        location.href = "auth.html";
+        location.href = "index.html";
         return;
       }
       currentUser = user;
