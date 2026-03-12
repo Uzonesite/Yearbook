@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>uZone Yearbook — My Spot</title>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
   <style>
     :root{
       --bg:#0b0b10;
       --panel:#13131c;
       --panel2:#171722;
       --line:#2c2d39;
+      --line2:rgba(255,255,255,.08);
       --text:#f5f7fb;
       --muted:#a7adbb;
       --accent:#7c5cff;
@@ -22,10 +22,11 @@
       --radius:24px;
     }
 
-    *{box-sizing:border-box}
-    body{
+    *{ box-sizing:border-box; }
+
+    html,body{
       margin:0;
-      min-height:100vh;
+      min-height:100%;
       font-family:Inter,system-ui,Arial,sans-serif;
       background:
         radial-gradient(circle at top left, rgba(124,92,255,.14), transparent 28%),
@@ -34,10 +35,19 @@
       color:var(--text);
     }
 
+    body{
+      display:flex;
+      flex-direction:column;
+    }
+
+    button,input,textarea{
+      font:inherit;
+    }
+
     .topbar{
       position:sticky;
       top:0;
-      z-index:30;
+      z-index:50;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -46,6 +56,7 @@
       background:rgba(10,10,16,.72);
       backdrop-filter:blur(12px);
       border-bottom:1px solid rgba(255,255,255,.07);
+      flex-wrap:wrap;
     }
 
     .brand{
@@ -57,23 +68,34 @@
     }
 
     .dot{
-      width:12px;height:12px;border-radius:50%;
+      width:12px;
+      height:12px;
+      border-radius:50%;
       background:linear-gradient(135deg,var(--accent),var(--accent2));
       box-shadow:0 0 22px rgba(124,92,255,.55);
     }
 
-    .top-actions,.toolbar{
+    .toolbar{
+      width:min(1400px,100%);
+      margin:18px auto 0;
+      padding:0 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .toolbar-left,
+    .toolbar-right{
       display:flex;
       gap:10px;
-      flex-wrap:wrap;
       align-items:center;
+      flex-wrap:wrap;
     }
 
-    button,a.btn,input,select,textarea{
-      font:inherit;
-    }
-
-    button,a.btn{
+    button,
+    a.btn{
       border:none;
       cursor:pointer;
       text-decoration:none;
@@ -87,176 +109,151 @@
       transition:.16s ease;
     }
 
-    button:hover,a.btn:hover{transform:translateY(-1px)}
-    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-    .ghost{background:#10111a;color:#fff;border:1px solid var(--line)}
-    .danger{background:#2a1218;color:#ff9eaa;border:1px solid #4a1c27}
-
-    .wrap{
-      width:min(1480px,100%);
-      margin:0 auto;
-      padding:20px;
-      display:grid;
-      grid-template-columns:340px 1fr;
-      gap:20px;
-      align-items:start;
+    button:hover,
+    a.btn:hover{
+      transform:translateY(-1px);
     }
 
-    .panel{
-      background:rgba(18,18,26,.88);
-      border:1px solid rgba(255,255,255,.07);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
+    .primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
     }
 
-    .sidebar{
-      padding:16px;
-      position:sticky;
-      top:88px;
+    .ghost{
+      background:#10111a;
+      color:#fff;
+      border:1px solid var(--line);
     }
 
-    .section{
-      background:#151621;
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:18px;
-      padding:14px;
-      margin-bottom:12px;
-    }
-
-    .section h3{
-      margin:0 0 10px;
-      font-size:1rem;
-      letter-spacing:-.02em;
-    }
-
-    .meta{
-      color:var(--muted);
-      line-height:1.55;
-      font-size:.95rem;
+    .danger{
+      background:#2a1218;
+      color:#ff9eaa;
+      border:1px solid #4a1c27;
     }
 
     .pill{
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding:8px 10px;
+      padding:9px 12px;
       border-radius:999px;
       background:rgba(124,92,255,.12);
       border:1px solid rgba(124,92,255,.24);
       color:#dbcfff;
-      font-size:.88rem;
-      font-weight:800;
-      margin-top:8px;
-    }
-
-    .field{margin-bottom:10px}
-    label{
-      display:block;
       font-size:.9rem;
-      font-weight:700;
-      margin-bottom:7px;
-    }
-
-    input[type="text"], input[type="color"], input[type="number"], textarea, select{
-      width:100%;
-      background:#0e0f16;
-      color:#fff;
-      border:1px solid var(--line);
-      border-radius:13px;
-      outline:none;
-      padding:11px 12px;
-    }
-
-    textarea{min-height:90px;resize:vertical}
-    input[type="file"]{
-      width:100%;
-      color:var(--muted);
-    }
-
-    .stack{display:grid;gap:10px}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-
-    .editor-panel{
-      padding:18px;
-    }
-
-    .toolbar{
-      margin-bottom:14px;
-      justify-content:space-between;
-    }
-
-    .toolbar-left,.toolbar-right{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
+      font-weight:800;
     }
 
     .status{
-      min-height:24px;
+      min-height:22px;
       color:var(--muted);
       font-weight:700;
     }
-    .status.good{color:var(--good)}
-    .status.bad{color:var(--bad)}
+
+    .status.good{ color:var(--good); }
+    .status.bad{ color:var(--bad); }
+
+    .main{
+      width:min(1400px,100%);
+      margin:16px auto 28px;
+      padding:0 20px 20px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .editor-shell{
+      background:rgba(18,18,26,.88);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .editor-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .editor-meta{
+      color:var(--muted);
+      line-height:1.55;
+      font-size:.95rem;
+    }
 
     .stage-wrap{
       display:grid;
       place-items:center;
       padding:20px;
       border-radius:22px;
-      background:
-        linear-gradient(180deg,#10111a,#0d0e15);
+      background:linear-gradient(180deg,#10111a,#0d0e15);
       border:1px solid rgba(255,255,255,.06);
-      min-height:70vh;
+      min-height:72vh;
       overflow:auto;
     }
 
-    .spot-stage{
-      background:#fff;
+    .stage{
       position:relative;
       overflow:hidden;
-      box-shadow:0 30px 70px rgba(0,0,0,.28);
+      background:#fff;
       border-radius:18px;
+      box-shadow:0 30px 70px rgba(0,0,0,.28);
       touch-action:none;
+      user-select:none;
+    }
+
+    .canvas-grid{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
+      background-size:50px 50px;
+      opacity:.35;
     }
 
     .item{
       position:absolute;
-      border:2px solid transparent;
-      user-select:none;
       transform-origin:center center;
       touch-action:none;
     }
 
     .item.selected{
-      border-color:rgba(124,92,255,.85);
-      box-shadow:0 0 0 3px rgba(124,92,255,.16);
-    }
-
-    .item img{
-      width:100%;height:100%;
-      display:block;
-      object-fit:contain;
-      pointer-events:none;
+      outline:2px solid rgba(124,92,255,.95);
+      outline-offset:0;
+      box-shadow:0 0 0 4px rgba(124,92,255,.14);
     }
 
     .item.text{
       white-space:pre-wrap;
       overflow-wrap:break-word;
       line-height:1.15;
-      padding:4px;
+      padding:4px 6px;
+      cursor:grab;
     }
 
-    .rotate-handle{
-      position:absolute;
-      width:20px;height:20px;
-      border-radius:50%;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      border:2px solid white;
-      top:-28px;right:-10px;
+    .item.image{
       cursor:grab;
-      box-shadow:0 4px 12px rgba(0,0,0,.25);
+    }
+
+    .item.dragging{
+      cursor:grabbing;
+    }
+
+    .item img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      pointer-events:none;
+      -webkit-user-drag:none;
+      user-select:none;
     }
 
     .signature{
@@ -266,132 +263,275 @@
       filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));
     }
 
-    .mini{
-      color:var(--muted);
+    .handle{
+      position:absolute;
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      border:2px solid #fff;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 4px 12px rgba(0,0,0,.25);
+      z-index:2;
+    }
+
+    .rotate-handle{
+      top:-30px;
+      right:-10px;
+      cursor:grab;
+    }
+
+    .resize-handle{
+      right:-10px;
+      bottom:-10px;
+      cursor:nwse-resize;
+    }
+
+    .empty-note{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#888;
+      font-weight:700;
+      letter-spacing:.01em;
+      pointer-events:none;
+      text-align:center;
+      padding:20px;
+    }
+
+    .modal-bg{
+      position:fixed;
+      inset:0;
+      z-index:100;
+      background:rgba(0,0,0,.58);
+      backdrop-filter:blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+
+    .modal{
+      width:min(560px,100%);
+      background:#101119;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .modal-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .modal h2{
+      margin:0;
+      font-size:1.2rem;
+      letter-spacing:-.02em;
+    }
+
+    .fields{
+      display:grid;
+      gap:12px;
+    }
+
+    .row-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    label{
+      display:block;
       font-size:.9rem;
+      font-weight:700;
+      margin-bottom:7px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="color"],
+    textarea,
+    input[type="file"]{
+      width:100%;
+      background:#0e0f16;
+      color:#fff;
+      border:1px solid var(--line);
+      border-radius:13px;
+      outline:none;
+      padding:11px 12px;
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:.92rem;
       line-height:1.55;
     }
 
-    .list{
-      display:grid;
-      gap:8px;
-      max-height:180px;
-      overflow:auto;
-    }
-
-    .sig-row{
-      padding:10px;
-      border-radius:12px;
-      background:#10111a;
-      border:1px solid rgba(255,255,255,.06);
-      font-size:.92rem;
+    .mini-panel{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
       color:var(--muted);
+      font-size:.92rem;
     }
 
-    @media (max-width: 1080px){
-      .wrap{grid-template-columns:1fr}
-      .sidebar{position:static}
+    @media (max-width: 900px){
+      .row-2{
+        grid-template-columns:1fr;
+      }
+
+      .stage-wrap{
+        min-height:60vh;
+        padding:14px;
+      }
+    }
+
+    @media (max-width: 700px){
+      .toolbar,
+      .main{
+        padding-left:14px;
+        padding-right:14px;
+      }
+
+      .topbar{
+        padding:14px;
+      }
+
+      button,
+      a.btn{
+        width:100%;
+      }
+
+      .toolbar-left,
+      .toolbar-right{
+        width:100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="topbar">
     <div class="brand"><span class="dot"></span> uZone Yearbook Editor</div>
-    <div class="top-actions">
+    <div class="toolbar-right">
       <a class="btn ghost" href="yearbook.html">View Book</a>
       <a class="btn ghost" href="index.html">Auth</a>
-      <button class="btn danger" id="logoutBtn">Logout</button>
+      <button class="danger" id="logoutBtn">Logout</button>
     </div>
   </div>
 
-  <div class="wrap">
-    <aside class="panel sidebar">
-      <div class="section">
-        <h3>Your account</h3>
-        <div class="meta" id="userMeta">Loading user...</div>
-        <div class="pill" id="typeBadge">Type 0 • 1/8 page</div>
-      </div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="ghost" id="addTextBtn">Add Text</button>
+      <button class="ghost" id="addImageBtn">Add Image</button>
+      <button class="ghost" id="deleteBtn">Delete Selected</button>
+      <button class="ghost" id="bringFrontBtn">Bring To Front</button>
+    </div>
 
-      <div class="section">
-        <h3>Add text</h3>
-        <div class="field">
-          <label for="textInput">Text</label>
-          <textarea id="textInput" placeholder="Write something for your yearbook spot..."></textarea>
-        </div>
-        <div class="two">
-          <div class="field">
-            <label for="textColor">Text color</label>
-            <input id="textColor" type="color" value="#111111" />
-          </div>
-          <div class="field">
-            <label for="fontSize">Font size</label>
-            <input id="fontSize" type="number" min="12" max="140" value="44" />
-          </div>
-        </div>
-        <button class="primary" id="addTextBtn">Add Text</button>
-      </div>
+    <div class="toolbar-right">
+      <div class="pill" id="typeBadge">Type 0 • 1/8 page</div>
+      <button class="ghost" id="saveBtn">Save Draft</button>
+      <button class="primary" id="publishBtn">Publish</button>
+      <button class="ghost" id="unpublishBtn">Unpublish</button>
+    </div>
+  </div>
 
-      <div class="section">
-        <h3>Add image</h3>
-        <div class="field">
-          <label for="imageInput">Upload image</label>
-          <input id="imageInput" type="file" accept="image/*" />
-        </div>
-        <div class="mini">
-          Images are compressed into the spot document. Keep them reasonable so the Firestore document does not get too large.
-        </div>
-      </div>
+  <div class="main">
+    <div class="status" id="status">Loading your spot...</div>
 
-      <div class="section">
-        <h3>Spot appearance</h3>
-        <div class="field">
-          <label for="bgColor">Background color</label>
-          <input id="bgColor" type="color" value="#ffffff" />
-        </div>
-        <button class="ghost" id="clearAllBtn">Clear Canvas</button>
-      </div>
-
-      <div class="section">
-        <h3>Selected item</h3>
-        <div class="field">
-          <label for="selectedRotation">Rotation</label>
-          <input id="selectedRotation" type="number" step="1" value="0" />
-        </div>
-        <div class="field">
-          <label for="selectedFontSize">Text size</label>
-          <input id="selectedFontSize" type="number" min="12" max="180" value="44" />
-        </div>
-        <div class="two">
-          <button class="ghost" id="bringFrontBtn">Bring Front</button>
-          <button class="danger" id="deleteItemBtn">Delete</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Signatures on your spot</h3>
-        <div class="mini" style="margin-bottom:8px;">
-          Friends can add signatures from the published book page. They show up here automatically.
-        </div>
-        <div class="list" id="signatureList"></div>
-      </div>
-    </aside>
-
-    <main class="panel editor-panel">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <button class="ghost" id="saveBtn">Save Draft</button>
-          <button class="primary" id="publishBtn">Publish</button>
-          <button class="ghost" id="unpublishBtn">Unpublish</button>
-        </div>
-        <div class="toolbar-right">
-          <div class="status" id="status">Loading your spot...</div>
+    <div class="editor-shell">
+      <div class="editor-top">
+        <div class="editor-meta" id="userMeta">Loading user...</div>
+        <div class="mini-panel">
+          <span>Drag to move.</span>
+          <span>Top-right handle rotates.</span>
+          <span>Bottom-right handle resizes.</span>
         </div>
       </div>
 
       <div class="stage-wrap">
-        <div id="spotStage" class="spot-stage"></div>
+        <div class="stage" id="spotStage"></div>
       </div>
-    </main>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="textModalBg">
+    <div class="modal">
+      <div class="modal-top">
+        <h2>Add Text</h2>
+        <button class="ghost" id="closeTextModalBtn">Close</button>
+      </div>
+
+      <div class="fields">
+        <div>
+          <label for="textInput">Text</label>
+          <textarea id="textInput" placeholder="Write something for your yearbook spot..."></textarea>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="textColor">Text color</label>
+            <input id="textColor" type="color" value="#111111" />
+          </div>
+          <div>
+            <label for="fontSize">Font size</label>
+            <input id="fontSize" type="number" min="12" max="160" value="44" />
+          </div>
+        </div>
+
+        <div class="hint">
+          After adding it, you can drag, rotate, and resize it directly on the canvas.
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="ghost" id="cancelTextBtn">Cancel</button>
+        <button class="primary" id="confirmAddTextBtn">Add Text</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="imageModalBg">
+    <div class="modal">
+      <div class="modal-top">
+        <h2>Add Image</h2>
+        <button class="ghost" id="closeImageModalBtn">Close</button>
+      </div>
+
+      <div class="fields">
+        <div>
+          <label for="imageInput">Choose image</label>
+          <input id="imageInput" type="file" accept="image/*" />
+        </div>
+
+        <div class="hint">
+          Images are compressed into the Firestore document. Smaller files will work better.
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="ghost" id="cancelImageBtn">Cancel</button>
+        <button class="primary" id="confirmAddImageBtn">Add Image</button>
+      </div>
+    </div>
   </div>
 
   <script type="module">
@@ -427,64 +567,128 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    /*
+      These sizes are intentionally matched to the new yearbook.html
+      so rendered item positions line up exactly between editor and book.
+    */
     const TYPE_LAYOUT = {
-      0: { label: "Type 0 • 1/8 page", cols: 1, rows: 1 },
-      1: { label: "Type 1 • 1/4 page", cols: 2, rows: 1 },
-      2: { label: "Type 2 • 1/2 page", cols: 2, rows: 2 },
-      3: { label: "Type 3 • Full page", cols: 2, rows: 4 }
+      0: {
+        label: "Type 0 • 1/8 page",
+        canvasWidth: 1000,
+        canvasHeight: 1000
+      },
+      1: {
+        label: "Type 1 • 1/4 page",
+        canvasWidth: 1000,
+        canvasHeight: 500
+      },
+      2: {
+        label: "Type 2 • 1/2 page",
+        canvasWidth: 1000,
+        canvasHeight: 1000
+      },
+      3: {
+        label: "Type 3 • Full page",
+        canvasWidth: 1000,
+        canvasHeight: 2000
+      }
     };
 
+    const spotStage = document.getElementById("spotStage");
     const userMeta = document.getElementById("userMeta");
     const typeBadge = document.getElementById("typeBadge");
-    const spotStage = document.getElementById("spotStage");
     const statusEl = document.getElementById("status");
-    const logoutBtn = document.getElementById("logoutBtn");
 
-    const textInput = document.getElementById("textInput");
-    const textColor = document.getElementById("textColor");
-    const fontSize = document.getElementById("fontSize");
     const addTextBtn = document.getElementById("addTextBtn");
-
-    const imageInput = document.getElementById("imageInput");
-    const bgColor = document.getElementById("bgColor");
-    const clearAllBtn = document.getElementById("clearAllBtn");
-
-    const selectedRotation = document.getElementById("selectedRotation");
-    const selectedFontSize = document.getElementById("selectedFontSize");
+    const addImageBtn = document.getElementById("addImageBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
     const bringFrontBtn = document.getElementById("bringFrontBtn");
-    const deleteItemBtn = document.getElementById("deleteItemBtn");
 
     const saveBtn = document.getElementById("saveBtn");
     const publishBtn = document.getElementById("publishBtn");
     const unpublishBtn = document.getElementById("unpublishBtn");
-    const signatureList = document.getElementById("signatureList");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const textModalBg = document.getElementById("textModalBg");
+    const closeTextModalBtn = document.getElementById("closeTextModalBtn");
+    const cancelTextBtn = document.getElementById("cancelTextBtn");
+    const confirmAddTextBtn = document.getElementById("confirmAddTextBtn");
+    const textInput = document.getElementById("textInput");
+    const textColor = document.getElementById("textColor");
+    const fontSize = document.getElementById("fontSize");
+
+    const imageModalBg = document.getElementById("imageModalBg");
+    const closeImageModalBtn = document.getElementById("closeImageModalBtn");
+    const cancelImageBtn = document.getElementById("cancelImageBtn");
+    const confirmAddImageBtn = document.getElementById("confirmAddImageBtn");
+    const imageInput = document.getElementById("imageInput");
 
     let currentUser = null;
     let userDoc = null;
     let spotDoc = null;
     let selectedId = null;
-    let zCounter = 5;
+    let zCounter = 1;
+    let dragState = null;
 
     function setStatus(msg = "", type = "") {
       statusEl.textContent = msg;
       statusEl.className = "status" + (type ? " " + type : "");
     }
 
-    function fitSize(type) {
-      const meta = TYPE_LAYOUT[type] || TYPE_LAYOUT[0];
-      const width = 1000;
-      const height = 1000 * (meta.rows / meta.cols);
-      return { width, height };
+    function escapeHtml(str = "") {
+      return String(str).replace(/[&<>"']/g, m => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+      }[m]));
     }
 
     function uid() {
-      return Math.random().toString(36).slice(2,10);
+      return Math.random().toString(36).slice(2, 10);
     }
 
-    function escapeHtml(str = "") {
-      return str.replace(/[&<>"']/g, m => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[m]));
+    function getTypeMeta(type) {
+      return TYPE_LAYOUT[type] || TYPE_LAYOUT[0];
+    }
+
+    function getCanvasSize(type) {
+      const meta = getTypeMeta(type);
+      return {
+        width: meta.canvasWidth,
+        height: meta.canvasHeight
+      };
+    }
+
+    function getElements() {
+      return Array.isArray(spotDoc?.elements) ? spotDoc.elements : [];
+    }
+
+    function setElements(elements) {
+      spotDoc.elements = elements;
+      zCounter = Math.max(1, ...elements.map(el => Number(el.z) || 1));
+    }
+
+    function getSelectedItem() {
+      return getElements().find(el => el.id === selectedId) || null;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function openModal(el) {
+      el.style.display = "flex";
+    }
+
+    function closeModal(el) {
+      el.style.display = "none";
+    }
+
+    function closeAllModals() {
+      closeModal(textModalBg);
+      closeModal(imageModalBg);
     }
 
     async function ensureDocs(user) {
@@ -544,100 +748,92 @@
         <strong>${escapeHtml(user.displayName || userDoc.displayName || "Student")}</strong><br>
         <span style="color:var(--muted)">${escapeHtml(user.email || "")}</span>
       `;
-      typeBadge.textContent = (TYPE_LAYOUT[userDoc.type] || TYPE_LAYOUT[0]).label;
-      bgColor.value = spotDoc.background || "#ffffff";
 
+      typeBadge.textContent = getTypeMeta(userDoc.type).label;
+      setElements(getElements());
       renderSpot();
-      renderSignaturesList();
       setStatus(spotDoc.published ? "Published" : "Draft loaded", spotDoc.published ? "good" : "");
     }
 
-    function renderSignaturesList() {
-      const sigs = Array.isArray(spotDoc.signatures) ? spotDoc.signatures : [];
-      if (!sigs.length) {
-        signatureList.innerHTML = `<div class="sig-row">No signatures yet.</div>`;
-        return;
-      }
-      signatureList.innerHTML = sigs
-        .slice()
-        .reverse()
-        .map(sig => `<div class="sig-row"><strong>${escapeHtml(sig.signerName || "Anonymous")}</strong></div>`)
-        .join("");
-    }
-
-    function getElements() {
-      return Array.isArray(spotDoc.elements) ? spotDoc.elements : [];
-    }
-
-    function setElements(elements) {
-      spotDoc.elements = elements;
-    }
-
-    function getSelectedItem() {
-      return getElements().find(el => el.id === selectedId) || null;
-    }
-
     function renderSpot() {
-      const type = userDoc?.type ?? 0;
-      const size = fitSize(type);
+      if (!spotDoc || !userDoc) return;
+
+      const size = getCanvasSize(userDoc.type || 0);
       spotStage.style.width = `${size.width}px`;
       spotStage.style.height = `${size.height}px`;
       spotStage.style.background = spotDoc.background || "#ffffff";
 
-      const itemsHtml = getElements().map(item => {
-        const isSelected = item.id === selectedId;
+      const elementsHtml = getElements().map(item => {
+        const selected = item.id === selectedId ? " selected" : "";
+        const baseStyle = `
+          left:${item.x || 0}px;
+          top:${item.y || 0}px;
+          width:${item.w || 80}px;
+          height:${item.h || 80}px;
+          transform:rotate(${item.rotation || 0}deg);
+          z-index:${item.z || 1};
+        `;
+
         if (item.kind === "text") {
           return `
-            <div class="item text ${isSelected ? "selected" : ""}"
-                 data-id="${item.id}"
-                 style="
-                  left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;
-                  transform:rotate(${item.rotation || 0}deg);
-                  z-index:${item.z || 1};
-                  color:${item.color || "#111111"};
-                  font-size:${item.fontSize || 44}px;
-                  font-weight:${item.fontWeight || 700};
-                  text-align:${item.align || "left"};
-                 ">
+            <div class="item text${selected}" data-id="${item.id}" style="${baseStyle}
+              color:${item.color || "#111111"};
+              font-size:${item.fontSize || 44}px;
+              font-weight:${item.fontWeight || 700};
+              font-family:${item.fontFamily || "Inter, Arial, sans-serif"};
+              text-align:${item.align || "left"};
+            ">
               ${escapeHtml(item.text || "")}
-              <div class="rotate-handle"></div>
+              ${item.id === selectedId ? `
+                <div class="handle rotate-handle" data-action="rotate"></div>
+                <div class="handle resize-handle" data-action="resize"></div>
+              ` : ""}
             </div>
           `;
         }
-        return `
-          <div class="item ${isSelected ? "selected" : ""}"
-               data-id="${item.id}"
-               style="
-                 left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;
-                 transform:rotate(${item.rotation || 0}deg);
-                 z-index:${item.z || 1};
-               ">
-            <img src="${item.src}" alt="" draggable="false" />
-            <div class="rotate-handle"></div>
-          </div>
-        `;
+
+        if (item.kind === "image") {
+          return `
+            <div class="item image${selected}" data-id="${item.id}" style="${baseStyle}">
+              <img src="${item.src}" alt="" draggable="false" />
+              ${item.id === selectedId ? `
+                <div class="handle rotate-handle" data-action="rotate"></div>
+                <div class="handle resize-handle" data-action="resize"></div>
+              ` : ""}
+            </div>
+          `;
+        }
+
+        return "";
       }).join("");
 
-      const sigsHtml = (spotDoc.signatures || []).map(sig => `
-        <img class="signature" src="${sig.dataUrl}"
-             style="left:${sig.x}px;top:${sig.y}px;width:${sig.w}px;height:${sig.h}px;transform:rotate(${sig.rotation || 0}deg);" />
+      const signaturesHtml = (spotDoc.signatures || []).map(sig => `
+        <img
+          class="signature"
+          src="${sig.dataUrl}"
+          style="
+            left:${sig.x || 0}px;
+            top:${sig.y || 0}px;
+            width:${sig.w || 0}px;
+            height:${sig.h || 0}px;
+            transform:rotate(${sig.rotation || 0}deg);
+          "
+          alt=""
+        />
       `).join("");
 
-      spotStage.innerHTML = itemsHtml + sigsHtml;
+      const emptyNote = getElements().length === 0
+        ? `<div class="empty-note">Your canvas is empty.<br>Use Add Text or Add Image.</div>`
+        : "";
 
-      attachItemBehavior();
-      updateSelectionFields();
-    }
+      spotStage.innerHTML = `
+        <div class="canvas-grid"></div>
+        ${elementsHtml}
+        ${signaturesHtml}
+        ${emptyNote}
+      `;
 
-    function updateSelectionFields() {
-      const item = getSelectedItem();
-      if (!item) {
-        selectedRotation.value = 0;
-        selectedFontSize.value = 44;
-        return;
-      }
-      selectedRotation.value = item.rotation || 0;
-      selectedFontSize.value = item.fontSize || 44;
+      bindStageEvents();
     }
 
     function selectItem(id) {
@@ -645,67 +841,169 @@
       renderSpot();
     }
 
-    spotStage.addEventListener("click", (e) => {
-      const itemEl = e.target.closest(".item");
-      if (!itemEl) {
-        selectedId = null;
-        renderSpot();
-        return;
-      }
-      selectItem(itemEl.dataset.id);
-    });
+    function clearSelection() {
+      selectedId = null;
+      renderSpot();
+    }
 
-    function attachItemBehavior() {
-      interact('.item').unset();
-      interact('.rotate-handle').unset();
+    function getStagePoint(clientX, clientY) {
+      const rect = spotStage.getBoundingClientRect();
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
 
-      interact('.item').draggable({
-        listeners: {
-          move(event) {
-            const id = event.target.dataset.id;
-            const item = getElements().find(el => el.id === id);
-            if (!item) return;
-            item.x += event.dx;
-            item.y += event.dy;
-            renderSpot();
+    function startMove(item, point, pointerId, targetEl) {
+      dragState = {
+        pointerId,
+        mode: "move",
+        itemId: item.id,
+        startX: point.x,
+        startY: point.y,
+        itemStartX: item.x || 0,
+        itemStartY: item.y || 0,
+        targetEl
+      };
+      targetEl.classList.add("dragging");
+    }
+
+    function startRotate(item, point, pointerId, itemEl) {
+      const cx = (item.x || 0) + (item.w || 0) / 2;
+      const cy = (item.y || 0) + (item.h || 0) / 2;
+      const startAngle = Math.atan2(point.y - cy, point.x - cx) * 180 / Math.PI;
+
+      dragState = {
+        pointerId,
+        mode: "rotate",
+        itemId: item.id,
+        centerX: cx,
+        centerY: cy,
+        startPointerAngle: startAngle,
+        itemStartRotation: item.rotation || 0,
+        targetEl: itemEl
+      };
+    }
+
+    function startResize(item, point, pointerId, itemEl) {
+      dragState = {
+        pointerId,
+        mode: "resize",
+        itemId: item.id,
+        startX: point.x,
+        startY: point.y,
+        itemStartW: item.w || 80,
+        itemStartH: item.h || 80,
+        itemStartX: item.x || 0,
+        itemStartY: item.y || 0,
+        aspect: (item.w || 80) / Math.max(1, (item.h || 80)),
+        isText: item.kind === "text",
+        startFontSize: item.fontSize || 44,
+        targetEl: itemEl
+      };
+    }
+
+    function bindStageEvents() {
+      const itemEls = spotStage.querySelectorAll(".item");
+
+      itemEls.forEach(itemEl => {
+        itemEl.addEventListener("pointerdown", (e) => {
+          const id = itemEl.dataset.id;
+          const item = getElements().find(el => el.id === id);
+          if (!item) return;
+
+          selectItem(id);
+
+          const point = getStagePoint(e.clientX, e.clientY);
+          const actionEl = e.target.closest("[data-action]");
+          const action = actionEl?.dataset.action || "move";
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          itemEl.setPointerCapture(e.pointerId);
+
+          if (action === "rotate") {
+            startRotate(item, point, e.pointerId, itemEl);
+          } else if (action === "resize") {
+            startResize(item, point, e.pointerId, itemEl);
+          } else {
+            startMove(item, point, e.pointerId, itemEl);
           }
-        }
-      }).resizable({
-        edges: { left: true, right: true, bottom: true, top: true },
-        listeners: {
-          move(event) {
-            const id = event.target.dataset.id;
-            const item = getElements().find(el => el.id === id);
-            if (!item) return;
-
-            item.x += event.deltaRect.left;
-            item.y += event.deltaRect.top;
-            item.w = Math.max(40, event.rect.width);
-            item.h = Math.max(40, event.rect.height);
-
-            renderSpot();
-          }
-        }
+        });
       });
 
-      interact('.rotate-handle').draggable({
-        listeners: {
-          move(event) {
-            const itemEl = event.target.parentElement;
-            const id = itemEl.dataset.id;
-            const item = getElements().find(el => el.id === id);
-            if (!item) return;
-
-            const rect = itemEl.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            const angle = Math.atan2(event.client.y - cy, event.client.x - cx) * 180 / Math.PI;
-            item.rotation = Math.round(angle + 90);
-            renderSpot();
-          }
+      spotStage.addEventListener("pointerdown", (e) => {
+        if (e.target === spotStage || e.target.classList.contains("canvas-grid") || e.target.classList.contains("empty-note")) {
+          clearSelection();
         }
       });
     }
+
+    window.addEventListener("pointermove", (e) => {
+      if (!dragState || e.pointerId !== dragState.pointerId) return;
+
+      const item = getElements().find(el => el.id === dragState.itemId);
+      if (!item) return;
+
+      const point = getStagePoint(e.clientX, e.clientY);
+      const canvasSize = getCanvasSize(userDoc?.type || 0);
+
+      if (dragState.mode === "move") {
+        const dx = point.x - dragState.startX;
+        const dy = point.y - dragState.startY;
+
+        item.x = clamp(Math.round(dragState.itemStartX + dx), 0, canvasSize.width - (item.w || 0));
+        item.y = clamp(Math.round(dragState.itemStartY + dy), 0, canvasSize.height - (item.h || 0));
+        renderSpot();
+        return;
+      }
+
+      if (dragState.mode === "rotate") {
+        const angle = Math.atan2(point.y - dragState.centerY, point.x - dragState.centerX) * 180 / Math.PI;
+        let rotation = dragState.itemStartRotation + (angle - dragState.startPointerAngle);
+
+        if (e.shiftKey) {
+          rotation = Math.round(rotation / 15) * 15;
+        }
+
+        item.rotation = Math.round(rotation);
+        renderSpot();
+        return;
+      }
+
+      if (dragState.mode === "resize") {
+        const dx = point.x - dragState.startX;
+        const dy = point.y - dragState.startY;
+
+        let newW = Math.max(50, Math.round(dragState.itemStartW + dx));
+        let newH;
+
+        if (dragState.isText) {
+          newH = Math.max(40, Math.round(dragState.itemStartH + dy));
+          const scale = newW / Math.max(1, dragState.itemStartW);
+          item.fontSize = clamp(Math.round(dragState.startFontSize * scale), 12, 180);
+        } else {
+          newH = Math.max(50, Math.round(newW / Math.max(0.1, dragState.aspect)));
+        }
+
+        newW = Math.min(newW, canvasSize.width - (item.x || 0));
+        newH = Math.min(newH, canvasSize.height - (item.y || 0));
+
+        item.w = newW;
+        item.h = newH;
+        renderSpot();
+      }
+    });
+
+    function endDrag(e) {
+      if (!dragState || e.pointerId !== dragState.pointerId) return;
+      dragState?.targetEl?.classList?.remove("dragging");
+      dragState = null;
+    }
+
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
 
     function addTextItem() {
       const text = textInput.value.trim();
@@ -714,24 +1012,29 @@
         return;
       }
 
-      const elements = getElements();
+      const elements = [...getElements()];
       const item = {
         id: uid(),
         kind: "text",
         text,
-        x: 50,
-        y: 50,
+        x: 60,
+        y: 60,
         w: 420,
         h: 180,
         rotation: 0,
-        color: textColor.value,
-        fontSize: Number(fontSize.value) || 44,
+        color: textColor.value || "#111111",
+        fontSize: clamp(Number(fontSize.value) || 44, 12, 180),
         fontWeight: 700,
+        fontFamily: "Inter, Arial, sans-serif",
+        align: "left",
         z: ++zCounter
       };
+
       elements.push(item);
       setElements(elements);
       selectedId = item.id;
+      closeModal(textModalBg);
+      textInput.value = "";
       renderSpot();
       setStatus("Text added.");
     }
@@ -740,10 +1043,10 @@
       const img = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
-          const i = new Image();
-          i.onload = () => resolve(i);
-          i.onerror = reject;
-          i.src = reader.result;
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = reader.result;
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
@@ -762,20 +1065,25 @@
     }
 
     async function addImageFromFile(file) {
-      if (!file) return;
+      if (!file) {
+        setStatus("Choose an image first.", "bad");
+        return;
+      }
+
       setStatus("Compressing image...");
       try {
         const src = await compressImageToDataUrl(file);
-        const elements = getElements();
+        const elements = [...getElements()];
 
+        const maxWidth = 420;
         const item = {
           id: uid(),
           kind: "image",
           src,
           x: 80,
           y: 80,
-          w: 360,
-          h: 260,
+          w: maxWidth,
+          h: 300,
           rotation: 0,
           z: ++zCounter
         };
@@ -783,21 +1091,24 @@
         elements.push(item);
         setElements(elements);
         selectedId = item.id;
+
+        closeModal(imageModalBg);
+        imageInput.value = "";
         renderSpot();
         setStatus("Image added.");
       } catch (err) {
         console.error(err);
         setStatus("Could not load that image.", "bad");
-      } finally {
-        imageInput.value = "";
       }
     }
 
     async function saveSpot(extra = {}) {
-      if (!currentUser) return;
+      if (!currentUser || !userDoc || !spotDoc) return;
+
       setStatus("Saving...");
       try {
         const spotRef = doc(db, "yearbook", `spot_${currentUser.uid}`);
+
         const payload = {
           kind: "spot",
           uid: currentUser.uid,
@@ -809,8 +1120,13 @@
           updatedAt: serverTimestamp(),
           ...extra
         };
+
         await setDoc(spotRef, payload, { merge: true });
-        if (typeof extra.published === "boolean") spotDoc.published = extra.published;
+
+        if (typeof extra.published === "boolean") {
+          spotDoc.published = extra.published;
+        }
+
         setStatus(spotDoc.published ? "Published" : "Draft saved", "good");
       } catch (err) {
         console.error(err);
@@ -818,50 +1134,48 @@
       }
     }
 
-    addTextBtn.onclick = addTextItem;
-    imageInput.onchange = (e) => addImageFromFile(e.target.files[0]);
+    addTextBtn.onclick = () => openModal(textModalBg);
+    addImageBtn.onclick = () => openModal(imageModalBg);
 
-    bgColor.oninput = () => {
-      if (!spotDoc) return;
-      spotDoc.background = bgColor.value;
-      renderSpot();
-    };
+    closeTextModalBtn.onclick = () => closeModal(textModalBg);
+    cancelTextBtn.onclick = () => closeModal(textModalBg);
+    confirmAddTextBtn.onclick = addTextItem;
 
-    clearAllBtn.onclick = () => {
-      if (!confirm("Clear all text and images from your spot?")) return;
-      spotDoc.elements = [];
+    closeImageModalBtn.onclick = () => closeModal(imageModalBg);
+    cancelImageBtn.onclick = () => closeModal(imageModalBg);
+    confirmAddImageBtn.onclick = () => addImageFromFile(imageInput.files[0]);
+
+    textModalBg.addEventListener("click", (e) => {
+      if (e.target === textModalBg) closeModal(textModalBg);
+    });
+
+    imageModalBg.addEventListener("click", (e) => {
+      if (e.target === imageModalBg) closeModal(imageModalBg);
+    });
+
+    deleteBtn.onclick = () => {
+      if (!selectedId) {
+        setStatus("Select something first.", "bad");
+        return;
+      }
+
+      spotDoc.elements = getElements().filter(el => el.id !== selectedId);
       selectedId = null;
+      setElements(spotDoc.elements);
       renderSpot();
-      setStatus("Canvas cleared.");
-    };
-
-    selectedRotation.oninput = () => {
-      const item = getSelectedItem();
-      if (!item) return;
-      item.rotation = Number(selectedRotation.value) || 0;
-      renderSpot();
-    };
-
-    selectedFontSize.oninput = () => {
-      const item = getSelectedItem();
-      if (!item || item.kind !== "text") return;
-      item.fontSize = Math.max(12, Number(selectedFontSize.value) || 44);
-      renderSpot();
+      setStatus("Item deleted.");
     };
 
     bringFrontBtn.onclick = () => {
       const item = getSelectedItem();
-      if (!item) return;
+      if (!item) {
+        setStatus("Select something first.", "bad");
+        return;
+      }
+
       item.z = ++zCounter;
       renderSpot();
-    };
-
-    deleteItemBtn.onclick = () => {
-      if (!selectedId) return;
-      spotDoc.elements = getElements().filter(el => el.id !== selectedId);
-      selectedId = null;
-      renderSpot();
-      setStatus("Item deleted.");
+      setStatus("Moved to front.");
     };
 
     saveBtn.onclick = () => saveSpot({ published: false });
@@ -873,12 +1187,29 @@
       location.href = "index.html";
     };
 
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (textModalBg.style.display === "flex" || imageModalBg.style.display === "flex") {
+          closeAllModals();
+        } else if (selectedId) {
+          clearSelection();
+        }
+      }
+
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedId && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        deleteBtn.click();
+      }
+    });
+
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         location.href = "index.html";
         return;
       }
+
       currentUser = user;
+
       try {
         await loadUserAndSpot(user);
       } catch (err) {
