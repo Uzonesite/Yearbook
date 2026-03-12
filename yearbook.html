@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uZone Yearbook — Book</title>
+  <style>
+    :root{
+      --bg:#0b0b10;
+      --panel:#12121a;
+      --panel2:#171721;
+      --line:#2c2d3a;
+      --text:#f4f7fb;
+      --muted:#a5adbc;
+      --accent:#7c5cff;
+      --accent2:#bb86fc;
+      --danger:#ff6b7a;
+      --good:#38c973;
+      --page:#f7f3ea;
+      --shadow:0 20px 60px rgba(0,0,0,.32);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Arial,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124,92,255,.12), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(187,134,252,.13), transparent 28%),
+        linear-gradient(180deg,#09090e,#11111a);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:16px 20px;
+      background:rgba(10,10,16,.7);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 0 22px rgba(124,92,255,.55);
+    }
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    button,a.btn{
+      border:none;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:800;
+      font-size:.95rem;
+      transition:.18s ease;
+    }
+    button:hover,a.btn:hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+    .ghost{background:#12131b;color:#fff;border:1px solid var(--line)}
+
+    .wrap{
+      width:min(1300px,100%);
+      margin:0 auto;
+      padding:24px 20px 60px;
+    }
+
+    .hero{
+      display:flex;
+      justify-content:space-between;
+      align-items:end;
+      gap:20px;
+      margin-bottom:22px;
+      flex-wrap:wrap;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:clamp(2rem,5vw,3.2rem);
+      letter-spacing:-.04em;
+    }
+
+    .hero p{
+      margin:8px 0 0;
+      color:var(--muted);
+      max-width:52ch;
+      line-height:1.6;
+    }
+
+    .book-shell{
+      background:rgba(18,18,26,.86);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .book-controls{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+
+    .meta{
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .book-stage{
+      display:grid;
+      grid-template-columns:1fr;
+      place-items:center;
+    }
+
+    .page{
+      width:min(860px,100%);
+      aspect-ratio:1/1.414;
+      background:linear-gradient(180deg,#fdfaf3,#f5efe4);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,.05),
+        0 30px 60px rgba(0,0,0,.18);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .page::before{
+      content:"";
+      position:absolute;
+      left:0;top:0;bottom:0;
+      width:20px;
+      background:linear-gradient(90deg, rgba(0,0,0,.08), transparent);
+      opacity:.18;
+      pointer-events:none;
+    }
+
+    .page-grid{
+      width:100%;
+      height:100%;
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      grid-template-rows:repeat(4,1fr);
+      gap:14px;
+    }
+
+    .spot{
+      position:relative;
+      overflow:hidden;
+      background:#fff;
+      border-radius:18px;
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:0 8px 20px rgba(0,0,0,.08);
+      cursor:pointer;
+    }
+
+    .spot.empty{
+      background:rgba(255,255,255,.5);
+      border-style:dashed;
+      border-color:rgba(0,0,0,.12);
+      cursor:default;
+    }
+
+    .spot-head{
+      position:absolute;
+      left:10px;top:10px;
+      z-index:4;
+      background:rgba(0,0,0,.52);
+      color:#fff;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:800;
+      backdrop-filter:blur(8px);
+      max-width:calc(100% - 20px);
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+
+    .spot-canvas{
+      position:absolute;inset:0;
+      overflow:hidden;
+      transform-origin:top left;
+      background:#fff;
+    }
+
+    .empty-note{
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      color:#786f67;
+      font-weight:700;
+      padding:20px;
+    }
+
+    .item{
+      position:absolute;
+      transform-origin:center center;
+      user-select:none;
+      pointer-events:none;
+    }
+
+    .item.text{
+      white-space:pre-wrap;
+      overflow-wrap:break-word;
+      line-height:1.15;
+    }
+
+    .signature{
+      position:absolute;
+      opacity:.9;
+      pointer-events:none;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));
+    }
+
+    .page-num{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .empty-book{
+      padding:40px 24px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .modal-bg{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      backdrop-filter:blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:100;
+    }
+
+    .modal{
+      width:min(980px,100%);
+      max-height:92vh;
+      overflow:auto;
+      background:#101119;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .modal-top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+
+    .preview{
+      width:100%;
+      aspect-ratio:1/1;
+      max-height:70vh;
+      background:#fff;
+      border-radius:20px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .preview .fit{
+      position:absolute;inset:0;
+      transform-origin:top left;
+    }
+
+    .sign-tools{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      margin-top:14px;
+      align-items:center;
+    }
+
+    .sign-card{
+      margin-top:14px;
+      background:#151621;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    input{
+      width:100%;
+      padding:12px 13px;
+      border-radius:12px;
+      background:#0d0f16;
+      color:#fff;
+      border:1px solid var(--line);
+      outline:none;
+    }
+
+    canvas.signature-pad{
+      width:100%;
+      height:220px;
+      background:#fff;
+      border-radius:16px;
+      touch-action:none;
+      display:block;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.55;
+      margin-top:8px;
+    }
+
+    @media (max-width: 700px){
+      .sign-tools{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> uZone Yearbook</div>
+    <div class="actions">
+      <a class="btn ghost" href="auth.html">Login / Sign Up</a>
+      <a class="btn primary" href="editor.html">My Spot</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>Published Yearbook</h1>
+        <p>
+          Flip through the published student spots. Tap any spot to open it larger, then sign it on the owner’s phone when you meet in person.
+        </p>
+      </div>
+    </div>
+
+    <div class="book-shell">
+      <div class="book-controls">
+        <div class="meta" id="bookMeta">Loading published pages...</div>
+        <div class="actions">
+          <button class="ghost" id="prevBtn">Previous</button>
+          <button class="ghost" id="nextBtn">Next</button>
+        </div>
+      </div>
+
+      <div id="bookContainer" class="book-stage"></div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="spotModalBg">
+    <div class="modal">
+      <div class="modal-top">
+        <div>
+          <h2 id="modalTitle" style="margin:0 0 4px;font-size:1.35rem;"></h2>
+          <div id="modalSub" style="color:var(--muted);font-weight:600;"></div>
+        </div>
+        <button class="ghost" id="closeModalBtn">Close</button>
+      </div>
+
+      <div class="preview" id="spotPreview">
+        <div class="fit" id="spotPreviewFit"></div>
+      </div>
+
+      <div class="sign-card">
+        <h3 style="margin:0 0 8px;">Sign this spot</h3>
+        <div class="hint">Best on mobile. Draw with your finger, then save your signature onto this student’s page.</div>
+
+        <div style="margin:12px 0 10px;">
+          <input id="signerNameInput" placeholder="Your name (optional if logged in)" />
+        </div>
+
+        <canvas id="signaturePad" class="signature-pad"></canvas>
+
+        <div class="sign-tools">
+          <button class="ghost" id="clearSignatureBtn">Clear</button>
+          <button class="ghost" id="cancelSignBtn">Cancel</button>
+          <button class="primary" id="saveSignatureBtn">Save Signature</button>
+        </div>
+
+        <div id="signStatus" class="hint"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      doc,
+      getDoc,
+      updateDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const TYPE_LAYOUT = {
+      0: { label: "Type 0 • 1/8 page", units: 1, cols: 1, rows: 1 },
+      1: { label: "Type 1 • 1/4 page", units: 2, cols: 2, rows: 1 },
+      2: { label: "Type 2 • 1/2 page", units: 4, cols: 2, rows: 2 },
+      3: { label: "Type 3 • Full page", units: 8, cols: 2, rows: 4 }
+    };
+
+    const bookContainer = document.getElementById("bookContainer");
+    const bookMeta = document.getElementById("bookMeta");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const spotModalBg = document.getElementById("spotModalBg");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalSub = document.getElementById("modalSub");
+    const spotPreview = document.getElementById("spotPreview");
+    const spotPreviewFit = document.getElementById("spotPreviewFit");
+    const signerNameInput = document.getElementById("signerNameInput");
+    const signaturePad = document.getElementById("signaturePad");
+    const clearSignatureBtn = document.getElementById("clearSignatureBtn");
+    const cancelSignBtn = document.getElementById("cancelSignBtn");
+    const saveSignatureBtn = document.getElementById("saveSignatureBtn");
+    const signStatus = document.getElementById("signStatus");
+
+    let currentUser = null;
+    let publishedSpots = [];
+    let packedPages = [];
+    let currentPageIndex = 0;
+    let activeSpot = null;
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user || null;
+      signerNameInput.value = user?.displayName || "";
+    });
+
+    function escapeHtml(str = "") {
+      return str.replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    function fitSize(type) {
+      const meta = TYPE_LAYOUT[type] || TYPE_LAYOUT[0];
+      return {
+        width: 1000,
+        height: 1000 * (meta.rows / meta.cols)
+      };
+    }
+
+    function firstFit(page, cols, rows) {
+      for (let r = 0; r <= 4 - rows; r++) {
+        for (let c = 0; c <= 2 - cols; c++) {
+          let ok = true;
+          for (let rr = r; rr < r + rows; rr++) {
+            for (let cc = c; cc < c + cols; cc++) {
+              if (page[rr][cc]) ok = false;
+            }
+          }
+          if (ok) return { row: r, col: c };
+        }
+      }
+      return null;
+    }
+
+    function markUsed(page, row, col, cols, rows, value) {
+      for (let r = row; r < row + rows; r++) {
+        for (let c = col; c < col + cols; c++) page[r][c] = value;
+      }
+    }
+
+    function packSpots(spots) {
+      const pages = [];
+      let current = Array.from({length:4}, () => Array(2).fill(null));
+
+      for (const spot of spots) {
+        const meta = TYPE_LAYOUT[spot.type] || TYPE_LAYOUT[0];
+        let pos = firstFit(current, meta.cols, meta.rows);
+
+        if (!pos) {
+          pages.push(current);
+          current = Array.from({length:4}, () => Array(2).fill(null));
+          pos = firstFit(current, meta.cols, meta.rows);
+        }
+
+        markUsed(current, pos.row, pos.col, meta.cols, meta.rows, {
+          spot,
+          start: true,
+          cols: meta.cols,
+          rows: meta.rows,
+          row: pos.row,
+          col: pos.col
+        });
+      }
+
+      if (current.flat().some(Boolean) || pages.length === 0) pages.push(current);
+      return pages;
+    }
+
+    function renderItem(item) {
+      if (item.kind === "text") {
+        return `
+          <div class="item text"
+            style="
+              left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;
+              transform:rotate(${item.rotation || 0}deg);
+              font-size:${item.fontSize || 36}px;
+              color:${item.color || "#111111"};
+              font-weight:${item.fontWeight || 700};
+              font-family:${item.fontFamily || "Inter, Arial, sans-serif"};
+              text-align:${item.align || "left"};
+            ">${escapeHtml(item.text || "")}</div>
+        `;
+      }
+
+      if (item.kind === "image") {
+        return `
+          <img class="item"
+            src="${item.src}"
+            style="
+              left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;
+              transform:rotate(${item.rotation || 0}deg);
+              object-fit:contain;
+            "
+          />
+        `;
+      }
+
+      return "";
+    }
+
+    function renderSignature(sig) {
+      return `
+        <img class="signature" src="${sig.dataUrl}"
+          style="left:${sig.x}px;top:${sig.y}px;width:${sig.w}px;height:${sig.h}px;transform:rotate(${sig.rotation || 0}deg);" />
+      `;
+    }
+
+    function buildSpotInner(spot) {
+      const size = fitSize(spot.type || 0);
+      const bg = spot.background || "#ffffff";
+      const elements = (spot.elements || []).map(renderItem).join("");
+      const signatures = (spot.signatures || []).map(renderSignature).join("");
+
+      return `
+        <div class="spot-canvas" style="background:${bg}; width:${size.width}px; height:${size.height}px;">
+          ${elements}
+          ${signatures}
+        </div>
+      `;
+    }
+
+    function renderBook() {
+      if (!packedPages.length || !publishedSpots.length) {
+        bookMeta.textContent = "No published spots yet.";
+        bookContainer.innerHTML = `<div class="empty-book">Nothing has been published yet.</div>`;
+        return;
+      }
+
+      currentPageIndex = Math.max(0, Math.min(currentPageIndex, packedPages.length - 1));
+      const page = packedPages[currentPageIndex];
+      bookMeta.textContent = `Page ${currentPageIndex + 1} of ${packedPages.length} • ${publishedSpots.length} published spots`;
+
+      const pageHtml = `
+        <div>
+          <div class="page">
+            <div class="page-grid">
+              ${page.map((row, r) => row.map((cell, c) => {
+                if (!cell) {
+                  return `<div class="spot empty"><div class="empty-note">Empty space</div></div>`;
+                }
+                if (!cell.start) return "";
+
+                const spot = cell.spot;
+                const meta = TYPE_LAYOUT[spot.type] || TYPE_LAYOUT[0];
+                return `
+                  <div class="spot"
+                       data-uid="${spot.uid}"
+                       style="grid-column:${c + 1} / span ${meta.cols}; grid-row:${r + 1} / span ${meta.rows};">
+                    <div class="spot-head">${escapeHtml(spot.ownerName || "Student")}</div>
+                    ${buildSpotInner(spot)}
+                  </div>
+                `;
+              }).join("")).join("")}
+            </div>
+          </div>
+          <div class="page-num">Yearbook Page ${currentPageIndex + 1}</div>
+        </div>
+      `;
+
+      bookContainer.innerHTML = pageHtml;
+
+      for (const spotEl of bookContainer.querySelectorAll(".spot:not(.empty)")) {
+        const inner = spotEl.querySelector(".spot-canvas");
+        const rect = spotEl.getBoundingClientRect();
+        const width = inner.offsetWidth;
+        const height = inner.offsetHeight;
+        const scale = Math.min(rect.width / width, rect.height / height);
+        inner.style.transform = `scale(${scale})`;
+
+        spotEl.addEventListener("click", () => {
+          const uid = spotEl.dataset.uid;
+          const spot = publishedSpots.find(s => s.uid === uid);
+          if (spot) openSpotModal(spot);
+        });
+      }
+    }
+
+    async function loadPublished() {
+      try {
+        const q = query(
+          collection(db, "yearbook"),
+          where("kind", "==", "spot"),
+          where("published", "==", true)
+        );
+
+        const snap = await getDocs(q);
+        publishedSpots = snap.docs.map(d => d.data()).sort((a,b) => {
+          const an = (a.ownerName || "").toLowerCase();
+          const bn = (b.ownerName || "").toLowerCase();
+          return an.localeCompare(bn);
+        });
+
+        packedPages = packSpots(publishedSpots);
+        renderBook();
+      } catch (err) {
+        console.error(err);
+        bookMeta.textContent = "Could not load the yearbook.";
+        bookContainer.innerHTML = `<div class="empty-book">Error loading published pages.</div>`;
+      }
+    }
+
+    prevBtn.onclick = () => {
+      if (!packedPages.length) return;
+      currentPageIndex = (currentPageIndex - 1 + packedPages.length) % packedPages.length;
+      renderBook();
+    };
+
+    nextBtn.onclick = () => {
+      if (!packedPages.length) return;
+      currentPageIndex = (currentPageIndex + 1) % packedPages.length;
+      renderBook();
+    };
+
+    function openSpotModal(spot) {
+      activeSpot = spot;
+      const meta = TYPE_LAYOUT[spot.type] || TYPE_LAYOUT[0];
+      modalTitle.textContent = spot.ownerName || "Student";
+      modalSub.textContent = meta.label;
+      spotPreviewFit.innerHTML = buildSpotInner(spot);
+
+      const fit = spotPreviewFit.querySelector(".spot-canvas");
+      requestAnimationFrame(() => {
+        const pw = spotPreview.clientWidth;
+        const ph = spotPreview.clientHeight;
+        const sw = fit.offsetWidth;
+        const sh = fit.offsetHeight;
+        const scale = Math.min(pw / sw, ph / sh);
+        fit.style.transform = `scale(${scale})`;
+      });
+
+      signStatus.textContent = "";
+      spotModalBg.style.display = "flex";
+      resizeSignatureCanvas();
+      clearPad();
+    }
+
+    closeModalBtn.onclick = () => spotModalBg.style.display = "none";
+    cancelSignBtn.onclick = () => {
+      clearPad();
+      signStatus.textContent = "";
+    };
+    spotModalBg.addEventListener("click", (e) => {
+      if (e.target === spotModalBg) spotModalBg.style.display = "none";
+    });
+
+    const ctx = signaturePad.getContext("2d");
+    let drawing = false;
+    let hasInk = false;
+
+    function resizeSignatureCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = signaturePad.getBoundingClientRect();
+      signaturePad.width = rect.width * ratio;
+      signaturePad.height = rect.height * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.lineWidth = 2.8;
+      ctx.strokeStyle = "#111111";
+      if (!hasInk) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, rect.width, rect.height);
+      }
+    }
+
+    function clearPad() {
+      const rect = signaturePad.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      hasInk = false;
+    }
+
+    function padPoint(e) {
+      const rect = signaturePad.getBoundingClientRect();
+      const touch = e.touches?.[0];
+      const clientX = touch ? touch.clientX : e.clientX;
+      const clientY = touch ? touch.clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startDraw(e) {
+      drawing = true;
+      hasInk = true;
+      const p = padPoint(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      e.preventDefault();
+    }
+
+    function moveDraw(e) {
+      if (!drawing) return;
+      const p = padPoint(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      e.preventDefault();
+    }
+
+    function endDraw() { drawing = false; }
+
+    signaturePad.addEventListener("mousedown", startDraw);
+    signaturePad.addEventListener("mousemove", moveDraw);
+    window.addEventListener("mouseup", endDraw);
+    signaturePad.addEventListener("touchstart", startDraw, { passive:false });
+    signaturePad.addEventListener("touchmove", moveDraw, { passive:false });
+    window.addEventListener("touchend", endDraw);
+
+    clearSignatureBtn.onclick = clearPad;
+    window.addEventListener("resize", resizeSignatureCanvas);
+
+    async function saveSignature() {
+      if (!activeSpot) return;
+      if (!hasInk) {
+        signStatus.textContent = "Draw a signature first.";
+        return;
+      }
+
+      saveSignatureBtn.disabled = true;
+      signStatus.textContent = "Saving signature...";
+
+      try {
+        const spotRef = doc(db, "yearbook", `spot_${activeSpot.uid}`);
+        const snap = await getDoc(spotRef);
+        if (!snap.exists()) throw new Error("Spot not found.");
+
+        const spot = snap.data();
+        const sigs = Array.isArray(spot.signatures) ? [...spot.signatures] : [];
+        const signerName = (signerNameInput.value.trim() || currentUser?.displayName || "Anonymous").slice(0, 40);
+
+        const size = fitSize(spot.type || 0);
+        const baseW = Math.max(180, size.width * 0.28);
+        const baseH = baseW * 0.45;
+
+        const existingCount = sigs.length;
+        const margin = 24;
+        const x = margin + (existingCount % 2) * (baseW + 16);
+        const y = size.height - baseH - margin - Math.floor(existingCount / 2) * (baseH + 14);
+
+        sigs.push({
+          signerUid: currentUser?.uid || null,
+          signerName,
+          dataUrl: signaturePad.toDataURL("image/png"),
+          x: Math.max(margin, Math.min(x, size.width - baseW - margin)),
+          y: Math.max(margin, Math.min(y, size.height - baseH - margin)),
+          w: baseW,
+          h: baseH,
+          rotation: (existingCount % 4 - 1.5) * 3,
+          createdAtMs: Date.now()
+        });
+
+        await updateDoc(spotRef, {
+          signatures: sigs,
+          updatedAt: serverTimestamp()
+        });
+
+        activeSpot.signatures = sigs;
+        openSpotModal(activeSpot);
+        signStatus.textContent = "Signature saved.";
+      } catch (err) {
+        console.error(err);
+        signStatus.textContent = err.message || "Could not save signature.";
+      } finally {
+        saveSignatureBtn.disabled = false;
+      }
+    }
+
+    saveSignatureBtn.onclick = saveSignature;
+
+    loadPublished();
+  </script>
+</body>
+</html>
